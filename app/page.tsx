@@ -1,11 +1,26 @@
+import { Show, UserButton } from "@clerk/nextjs";
+import Link from "next/link";
+
 export default function Home() {
   return (
     <div className="noti-shell">
       <div className="topline" aria-hidden="true" />
       <header className="site-header">
         <a className="brand" href="#top" aria-label="Noti home"><span className="brand-mark">n</span><span>noti</span></a>
-        <nav className="nav-links" aria-label="Main navigation"><a href="#how-it-works">How it works</a><a href="#features">Features</a><a href="#journal">Journal</a></nav>
-        <a className="header-cta" href="#start">Get started <span aria-hidden="true">↗</span></a>
+        <nav className="nav-links" aria-label="Main navigation">
+          <a href="#how-it-works">How it works</a>
+          <a href="#features">Features</a>
+          <a href="#journal">Journal</a>
+        </nav>
+        <Show when="signed-out">
+          <div className="nav-links auth-actions">
+            <Link className="header-cta mr-1" href="/sign-in">Sign in</Link>
+            <Link className="header-cta" href="/sign-up">Get started <span aria-hidden="true">↗</span></Link>
+          </div>
+        </Show>
+        <Show when="signed-in">
+          <div className="auth-actions"><Link className="header-cta" href="/dashboard">Start writing <span aria-hidden="true">↗</span></Link><UserButton /></div>
+        </Show>
       </header>
       <main id="top">
         <section className="hero-section">
@@ -13,7 +28,7 @@ export default function Home() {
             <p className="eyebrow"><span className="eyebrow-dot" /> Your second brain, made simple</p>
             <h1>Make space<br /><em>for what matters.</em></h1>
             <p className="hero-text">Noti turns scattered thoughts into clear, useful notes. Capture the spark, find the signal, and keep moving.</p>
-            <div className="hero-actions" id="start"><a className="primary-button" href="mailto:hello@noti.app">Start writing free <span aria-hidden="true">↗</span></a><a className="text-link" href="#how-it-works">See how it works <span aria-hidden="true">↓</span></a></div>
+            <div className="hero-actions" id="start"><Link className="primary-button" href="/sign-up">Start writing free <span aria-hidden="true">↗</span></Link><a className="text-link" href="#how-it-works">See how it works <span aria-hidden="true">↓</span></a></div>
             <p className="fine-print">No credit card required <span>·</span> Free forever for personal notes</p>
           </div>
           <div className="hero-visual" aria-label="Noti note interface preview">
