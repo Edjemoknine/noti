@@ -2,9 +2,7 @@
   "version": "8",
   "dialect": "postgres",
   "id": "86fed300-b9e3-44a6-ba7b-ef9ae1ee63bc",
-  "prevIds": [
-    "00000000-0000-0000-0000-000000000000"
-  ],
+  "prevIds": ["00000000-0000-0000-0000-000000000000"],
   "ddl": [
     {
       "isRlsEnabled": false,
@@ -52,9 +50,7 @@
       "table": "todo"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "todo_pkey",
       "schema": "public",

@@ -1,10 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {
-  startRecording,
-  stopRecording,
-} from "@/lib/recorder";
+import { startRecording, stopRecording } from "@/lib/recorder";
 import { blobToAudioData } from "@/lib/audio";
 import { loadWhisper, transcribe } from "@/lib/whisper";
 

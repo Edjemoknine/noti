@@ -5,10 +5,7 @@ let whisper: any = null;
 
 export async function loadWhisper() {
   if (!whisper) {
-    whisper = await pipeline(
-      "automatic-speech-recognition",
-      "Xenova/whisper-tiny.en"
-    );
+    whisper = await pipeline("automatic-speech-recognition", "Xenova/whisper-tiny.en");
   }
 
   return whisper;

@@ -9,7 +9,9 @@ export default function AuthLayout({ children }: Readonly<{ children: React.Reac
             <span className="auth-brand-mark">n</span>
             <span>noti</span>
           </Link>
-          <Link className="auth-back-link" href="/">Back home <span aria-hidden="true">↗</span></Link>
+          <Link className="auth-back-link" href="/">
+            Back home <span aria-hidden="true">↗</span>
+          </Link>
         </div>
         {children}
         <p className="auth-footer mt-6 text-center">A little more clarity, every day.</p>
