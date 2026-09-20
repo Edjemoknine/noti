@@ -15,59 +15,24 @@ import {
 import Sidebare from "@/components/core/Sidebare";
 import { useRouter } from "next/navigation";
 import Header from "@/components/core/Header";
-
-const initialNotes = [
-  {
-    title: "Q4 product strategy",
-    excerpt: "The main opportunity is to make insights feel inevitable, not like another task...",
-    date: "Today, 10:42 AM",
-    tag: "Product",
-    color: "violet",
-    starred: true,
-  },
-  {
-    title: "Ideas for the new onboarding",
-    excerpt:
-      "A softer first-run experience. Let people start with a thought instead of a blank page.",
-    date: "Yesterday",
-    tag: "Ideas",
-    color: "amber",
-    starred: false,
-  },
-  {
-    title: "Team offsite — Lisbon",
-    excerpt: "Things to bring: analog camera, comfortable shoes, and a very open mind.",
-    date: "Sep 16",
-    tag: "Personal",
-    color: "teal",
-    starred: false,
-  },
-  {
-    title: "Reading notes: The Creative Act",
-    excerpt: "Create an environment where the next idea has somewhere to land.",
-    date: "Sep 14",
-    tag: "Reading",
-    color: "blue",
-    starred: true,
-  },
-];
+import { notes } from "@/lib/notes";
 
 export default function Page() {
-  const [notes, setNotes] = useState(initialNotes);
+  const [noteList] = useState(notes);
   const [activeNav, setActiveNav] = useState("All notes");
   const [search, setSearch] = useState("");
   const [mobileNav, setMobileNav] = useState(false);
 
   const filteredNotes = useMemo(
     () =>
-      notes.filter((note) => {
+      noteList.filter((note) => {
         const matchesSearch = `${note.title} ${note.excerpt} ${note.tag}`
           .toLowerCase()
           .includes(search.toLowerCase());
         const matchesNav = activeNav !== "Starred" || note.starred;
         return matchesSearch && matchesNav;
       }),
-    [notes, search, activeNav],
+    [noteList, search, activeNav],
   );
 
   const router = useRouter();
@@ -160,9 +125,11 @@ export default function Page() {
           <div className="divide-y divide-black/[0.06] rounded-2xl border border-black/[0.06] bg-white/60">
             {filteredNotes.length ? (
               filteredNotes.map((note) => (
-                <article
+                <button
                   key={note.title}
-                  className="group flex items-start gap-4 p-5 transition hover:bg-white sm:p-6"
+                  type="button"
+                  onClick={() => router.push(`/show/${note.id}`)}
+                  className="group flex items-start gap-4 p-5 transition hover:bg-white sm:p-6 w-full cursor-pointer"
                 >
                   <div
                     className={`mt-1 flex size-9 shrink-0 items-center justify-center rounded-[10px] ${note.color === "violet" ? "bg-[#eee8fc] text-[#9175dc]" : note.color === "amber" ? "bg-[#fbf0df] text-[#d29b58]" : note.color === "teal" ? "bg-[#e1f2ee] text-[#5eaa99]" : "bg-[#e4eef8] text-[#6c9aca]"}`}
@@ -185,13 +152,13 @@ export default function Page() {
                       </span>
                     </div>
                   </div>
-                  <button
+                  <span
                     className="mt-1 rounded-lg p-1.5 text-[#c0bdbb] opacity-0 transition hover:bg-black/[0.04] hover:text-[#777] group-hover:opacity-100"
                     aria-label={`Options for ${note.title}`}
                   >
                     <MoreHorizontal size={17} />
-                  </button>
-                </article>
+                  </span>
+                </button>
               ))
             ) : (
               <div className="p-12 text-center text-sm text-[#999]">
