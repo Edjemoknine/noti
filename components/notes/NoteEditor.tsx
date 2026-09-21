@@ -2,27 +2,41 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Check, ChevronDown, Mic, PenLine, Sparkles, Tag, X } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { createNote, updateNote } from "@/actions/notes";
+import type { NoteRecord } from "@/actions/notes";
 import { useSpeechToText } from "@/hooks/useSpeechToText";
-import type { Note } from "@/lib/notes";
 
 type NoteEditorProps = {
-  note?: Note;
+  note?: Pick<NoteRecord, "id" | "title" | "content" | "tag">;
   mode?: "create" | "update";
 };
 
 export default function NoteEditor({ note, mode = "create" }: NoteEditorProps) {
+  const router = useRouter();
+  const queryClient = useQueryClient();
   const speech = useSpeechToText();
   const [inputMode, setInputMode] = useState<"write" | "voice">("write");
   const [title, setTitle] = useState(note?.title ?? "");
-  const [body, setBody] = useState(note?.body ?? "");
+  const [body, setBody] = useState(note?.content ?? "");
   const [tag, setTag] = useState(note?.tag ?? "Inbox");
   const [saved, setSaved] = useState(false);
   const noteBody = inputMode === "voice" && speech.text ? speech.text : body;
+  const saveNote = useMutation({
+    mutationFn: (input: { title: string; body: string; tag: string }) =>
+      mode === "update" && note ? updateNote(note.id, input) : createNote(input),
+    onSuccess: (savedNote) => {
+      queryClient.invalidateQueries({ queryKey: ["notes"] });
+      setSaved(true);
+      router.push(mode === "update" && savedNote ? `/show/${savedNote.id}` : "/dashboard");
+    },
+  });
 
   function handleSave() {
     if (!title.trim() && !noteBody.trim()) return;
-    setSaved(true);
+    saveNote.mutate({ title, body: noteBody, tag });
   }
 
   function handleModeChange(nextMode: "write" | "voice") {
@@ -50,7 +64,7 @@ export default function NoteEditor({ note, mode = "create" }: NoteEditorProps) {
           <button
             type="button"
             onClick={handleSave}
-            disabled={!title.trim() && !noteBody.trim()}
+            disabled={saveNote.isPending || (!title.trim() && !noteBody.trim())}
             className="flex h-9 items-center gap-2 rounded-lg bg-[#1f2825] px-3.5 text-xs font-medium text-white transition hover:bg-[#3b3347] disabled:cursor-not-allowed disabled:opacity-40"
           >
             <Check size={14} /> {mode === "update" ? "Save changes" : "Save note"}

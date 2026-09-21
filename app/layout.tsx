@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
+import QueryProvider from "@/components/core/QueryProvider";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -27,7 +28,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full flex flex-col">
         <ClerkProvider signInUrl="/sign-in" signUpUrl="/sign-up">
-          {children}
+          <QueryProvider>{children}</QueryProvider>
         </ClerkProvider>
       </body>
     </html>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import {
   ArrowUpRight,
   BrainCircuit,
@@ -15,18 +16,21 @@ import {
 import Sidebare from "@/components/core/Sidebare";
 import { useRouter } from "next/navigation";
 import Header from "@/components/core/Header";
-import { notes } from "@/lib/notes";
+import { listNotes } from "@/actions/notes";
 
 export default function Page() {
-  const [noteList] = useState(notes);
   const [activeNav, setActiveNav] = useState("All notes");
   const [search, setSearch] = useState("");
   const [mobileNav, setMobileNav] = useState(false);
+  const { data: noteList = [], isLoading } = useQuery({
+    queryKey: ["notes"],
+    queryFn: listNotes,
+  });
 
   const filteredNotes = useMemo(
     () =>
       noteList.filter((note) => {
-        const matchesSearch = `${note.title} ${note.excerpt} ${note.tag}`
+        const matchesSearch = `${note.title} ${note.content} ${note.tag}`
           .toLowerCase()
           .includes(search.toLowerCase());
         const matchesNav = activeNav !== "Starred" || note.starred;
@@ -123,10 +127,12 @@ export default function Page() {
             </button>
           </div>
           <div className="divide-y divide-black/[0.06] rounded-2xl border border-black/[0.06] bg-white/60">
-            {filteredNotes.length ? (
+            {isLoading ? (
+              <div className="p-12 text-center text-sm text-[#999]">Loading notes...</div>
+            ) : filteredNotes.length ? (
               filteredNotes.map((note) => (
                 <button
-                  key={note.title}
+                  key={note.id}
                   type="button"
                   onClick={() => router.push(`/show/${note.id}`)}
                   className="group flex items-start gap-4 p-5 transition hover:bg-white sm:p-6 w-full cursor-pointer"
@@ -143,9 +149,9 @@ export default function Page() {
                       </h3>
                       {note.starred && <Star size={13} className="fill-[#c59ae9] text-[#c59ae9]" />}
                     </div>
-                    <p className="mt-1 line-clamp-1 text-sm text-[#979391]">{note.excerpt}</p>
+                    <p className="mt-1 line-clamp-1 text-sm text-[#979391]">{note.content}</p>
                     <div className="mt-3 flex items-center gap-3 text-[11px] text-[#b0aca9]">
-                      <span>{note.date}</span>
+                      <span>{note.updatedAt.toLocaleDateString()}</span>
                       <span className="size-1 rounded-full bg-[#d2cfcc]" />
                       <span className="flex items-center gap-1">
                         <Tag size={11} /> {note.tag}

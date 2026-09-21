@@ -2,14 +2,32 @@
 
 import Link from "next/link";
 import { use, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Edit3, FileText, MoreHorizontal, Star, Tag } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { deleteNote, getNote } from "@/actions/notes";
 import Header from "@/components/core/Header";
 import Sidebare from "@/components/core/Sidebare";
-import { getNote } from "@/lib/notes";
 
 export default function ShowNotePage({ params }: { params: Promise<{ id: string }> }) {
-  const note = getNote(use(params).id);
+  const id = use(params).id;
   const [mobileNav, setMobileNav] = useState(false);
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  const { data: note, isLoading } = useQuery({
+    queryKey: ["notes", id],
+    queryFn: () => getNote(id),
+  });
+  const removeNote = useMutation({
+    mutationFn: () => deleteNote(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notes"] });
+      router.push("/dashboard");
+    },
+  });
+
+  if (isLoading) return <div className="p-8 text-sm text-[#777472]">Loading note...</div>;
+  if (!note) return <div className="p-8 text-sm text-[#777472]">Note not found.</div>;
 
   return (
     <main className="dashboard-shell flex min-h-screen w-full bg-[#f5f5ef] text-[#1f2825] lg:flex">
@@ -39,6 +57,10 @@ export default function ShowNotePage({ params }: { params: Promise<{ id: string 
               <button
                 type="button"
                 aria-label="More options"
+                onClick={() => {
+                  if (window.confirm("Delete this note?")) removeNote.mutate();
+                }}
+                disabled={removeNote.isPending}
                 className="rounded-lg p-2 text-[#aaa7a5] transition hover:bg-black/[0.04] hover:text-[#5d5956]"
               >
                 <MoreHorizontal size={18} />
@@ -50,7 +72,7 @@ export default function ShowNotePage({ params }: { params: Promise<{ id: string 
               <span className="flex size-9 items-center justify-center rounded-[10px] bg-[#eee8fc] text-[#9175dc]">
                 <FileText size={16} />
               </span>
-              <span>{note.date}</span>
+              <span>{note.updatedAt.toLocaleDateString()}</span>
               <span className="size-1 rounded-full bg-[#d2cfcc]" />
               <span className="flex items-center gap-1">
                 <Tag size={11} /> {note.tag}
@@ -61,10 +83,10 @@ export default function ShowNotePage({ params }: { params: Promise<{ id: string 
               {note.title}
             </h1>
             <div className="mt-10 whitespace-pre-line font-serif text-lg leading-8 text-[#4c4948]">
-              {note.body}
+              {note.content}
             </div>
             <div className="mt-12 border-t border-black/[0.08] pt-5 text-xs text-[#aaa7a5]">
-              Last updated {note.date.toLowerCase()}
+              Last updated {note.updatedAt.toLocaleDateString()}
             </div>
           </article>
         </div>
