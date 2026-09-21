@@ -12,10 +12,16 @@ import {
   X,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { Button } from "../ui/button";
 const navItems = [
   { label: "All notes", icon: FileText, count: 128 },
   { label: "Starred", icon: Star, count: 12 },
   { label: "Archive", icon: Archive },
+];
+const collectionItems = [
+  { label: "Product thinking", color: "text-[#8d7ad0]" },
+  { label: "Personal", color: "text-[#e4a75f]" },
+  { label: "Reading list", color: "text-[#6fb7a5]" },
 ];
 type SidebareProps = {
   mobileNav: boolean;
@@ -49,15 +55,15 @@ const Sidebare = ({ mobileNav, setMobileNav, setActiveNav, activeNav }: Sidebare
             </button>
           </div>
 
-          <button
+          <Button
             onClick={() => router.push("/create")}
-            className="mb-8 px-4 flex h-11 items-center justify-center gap-2 rounded-xl bg-[#1f2825] text-sm font-medium text-white shadow-[0_4px_12px_rgba(40,30,50,.12)] transition hover:bg-[#3b3347]"
+            className="mb-8 px-4 flex h-11 items-center justify-center gap-2 rounded-xl bg-secondary text-sm font-medium text-white shadow-[0_4px_12px_rgba(40,30,50,.12)] transition hover:bg-[#3b3347]"
           >
             <Plus size={16} /> New note{" "}
             <span className="ml-auto mr-3 rounded-md bg-white/10 px-1.5 py-0.5 text-[10px] text-white/60">
               ⌘ N
             </span>
-          </button>
+          </Button>
 
           <nav className="space-y-1">
             <p className="mb-2 px-3 text-[10px] font-bold uppercase tracking-[0.16em] text-[#aaa8a6]">
@@ -66,10 +72,12 @@ const Sidebare = ({ mobileNav, setMobileNav, setActiveNav, activeNav }: Sidebare
             {navItems.map(({ label, icon: Icon, count }) => (
               <button
                 key={label}
+                type="button"
                 onClick={() => {
                   setActiveNav(label);
                   setMobileNav(false);
                 }}
+                aria-current={activeNav === label ? "page" : undefined}
                 className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] ${activeNav === label ? "bg-[#efedf4] font-semibold text-[#30293a]" : "text-[#777472] hover:bg-black/[0.03]"}`}
               >
                 <Icon size={16} strokeWidth={activeNav === label ? 2.2 : 1.8} />
@@ -83,22 +91,35 @@ const Sidebare = ({ mobileNav, setMobileNav, setActiveNav, activeNav }: Sidebare
             <p className="mb-2 px-3 text-[10px] font-bold uppercase tracking-[0.16em] text-[#aaa8a6]">
               Collections
             </p>
-            <button className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] text-[#777472] hover:bg-black/[0.03]">
-              <Folder size={16} className="text-[#8d7ad0]" /> Product thinking
-            </button>
-            <button className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] text-[#777472] hover:bg-black/[0.03]">
-              <Folder size={16} className="text-[#e4a75f]" /> Personal
-            </button>
-            <button className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] text-[#777472] hover:bg-black/[0.03]">
-              <Folder size={16} className="text-[#6fb7a5]" /> Reading list
-            </button>
-            <button className="mt-2 flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] text-[#aaa7a5] hover:bg-black/[0.03]">
+            {collectionItems.map(({ label, color }) => (
+              <button
+                key={label}
+                type="button"
+                onClick={() => {
+                  setActiveNav(label);
+                  setMobileNav(false);
+                }}
+                aria-current={activeNav === label ? "page" : undefined}
+                className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] ${activeNav === label ? "bg-[#efedf4] font-semibold text-[#30293a]" : "text-[#777472] hover:bg-black/[0.03]"}`}
+              >
+                <Folder size={16} className={color} /> {label}
+              </button>
+            ))}
+            <button
+              type="button"
+              className="mt-2 flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] text-[#aaa7a5] hover:bg-black/[0.03]"
+            >
               <Plus size={15} /> New collection
             </button>
           </div>
         </div>
         <div className="mt-auto space-y-1 border-t border-black/[0.06] pt-5">
-          <button className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] text-[#777472] hover:bg-black/[0.03]">
+          <button
+            type="button"
+            onClick={() => setActiveNav("Settings")}
+            aria-current={activeNav === "Settings" ? "page" : undefined}
+            className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] ${activeNav === "Settings" ? "bg-[#efedf4] font-semibold text-[#30293a]" : "text-[#777472] hover:bg-black/[0.03]"}`}
+          >
             <Settings size={16} /> Settings
           </button>
           <div className="mt-4 flex items-center gap-3 px-3">

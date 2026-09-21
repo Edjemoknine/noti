@@ -33,7 +33,13 @@ export default function Page() {
         const matchesSearch = `${note.title} ${note.content} ${note.tag}`
           .toLowerCase()
           .includes(search.toLowerCase());
-        const matchesNav = activeNav !== "Starred" || note.starred;
+        const matchesNav =
+          activeNav === "All notes" ||
+          (activeNav === "Starred" && note.starred) ||
+          (activeNav === "Archive" && note.status === "archived") ||
+          (activeNav === "Product thinking" && note.tag === "Product") ||
+          (activeNav === "Personal" && note.tag === "Personal") ||
+          (activeNav === "Reading list" && note.tag === "Reading");
         return matchesSearch && matchesNav;
       }),
     [noteList, search, activeNav],
