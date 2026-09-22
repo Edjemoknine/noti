@@ -24,7 +24,32 @@ export default function NoteEditor({ note, mode = "create" }: NoteEditorProps) {
   const [tag, setTag] = useState(note?.tag ?? "Inbox");
   const [saved, setSaved] = useState(false);
   const noteBody = inputMode === "voice" && speech.text ? speech.text : body;
-  const saveNote = useMutation({
+
+  const [loading, setLoading] = useState(false);
+  const [generationError, setGenerationError] = useState<string | null>(null);
+  const [data, setData] = useState(null);
+
+  const handleExtract = async () => {
+    setLoading(true);
+    setGenerationError(null);
+    try {
+      const res = await fetch("/api/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: title }),
+      });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error ?? "Could not generate note details.");
+      setData(result);
+    } catch (err) {
+      console.error(err);
+      setGenerationError(err instanceof Error ? err.message : "Could not generate note details.");
+    } finally {
+      setLoading(false);
+    }
+  };
+  console.log(data);
+  /* const saveNote = useMutation({
     mutationFn: (input: { title: string; body: string; tag: string }) =>
       mode === "update" && note ? updateNote(note.id, input) : createNote(input),
     onSuccess: (savedNote) => {
@@ -32,11 +57,14 @@ export default function NoteEditor({ note, mode = "create" }: NoteEditorProps) {
       setSaved(true);
       router.push(mode === "update" && savedNote ? `/show/${savedNote.id}` : "/dashboard");
     },
-  });
+  }); */
 
   function handleSave() {
-    if (!title.trim() && !noteBody.trim()) return;
-    saveNote.mutate({ title, body: noteBody, tag });
+    handleExtract();
+    /*     if (!title.trim() && !noteBody.trim()) return;
+     */
+    /*     saveNote.mutate({ title, body: noteBody, tag });
+     */
   }
 
   function handleModeChange(nextMode: "write" | "voice") {
@@ -64,8 +92,8 @@ export default function NoteEditor({ note, mode = "create" }: NoteEditorProps) {
           <button
             type="button"
             onClick={handleSave}
-            disabled={saveNote.isPending || (!title.trim() && !noteBody.trim())}
-            className="flex h-9 items-center gap-2 rounded-lg bg-[#1f2825] px-3.5 text-xs font-medium text-white transition hover:bg-[#3b3347] disabled:cursor-not-allowed disabled:opacity-40"
+            /*             disabled={saveNote.isPending || (!title.trim() && !noteBody.trim())}
+             */ className="flex h-9 items-center gap-2 rounded-lg bg-[#1f2825] px-3.5 text-xs font-medium text-white transition hover:bg-[#3b3347] disabled:cursor-not-allowed disabled:opacity-40"
           >
             <Check size={14} /> {mode === "update" ? "Save changes" : "Save note"}
           </button>
@@ -135,6 +163,26 @@ export default function NoteEditor({ note, mode = "create" }: NoteEditorProps) {
                   </p>
                 </div>
               </div>
+              {speech.isModelLoading && (
+                <div
+                  className="ml-3 w-full max-w-[260px]"
+                  role="progressbar"
+                  aria-valuenow={speech.modelProgress}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                >
+                  <div className="mb-1 flex justify-between text-[10px] text-[#8b966e]">
+                    <span>Loading speech model</span>
+                    <span>{speech.modelProgress}%</span>
+                  </div>
+                  <div className="h-1 overflow-hidden rounded-full bg-[#dfe8bc]">
+                    <div
+                      className="h-full bg-[#829c26] transition-[width] duration-300"
+                      style={{ width: `${speech.modelProgress}%` }}
+                    />
+                  </div>
+                </div>
+              )}
               <button
                 type="button"
                 onClick={speech.isRecording ? speech.stop : speech.start}
@@ -182,6 +230,25 @@ export default function NoteEditor({ note, mode = "create" }: NoteEditorProps) {
               </p>
             </div>
           </div>
+          {loading && (
+            <div
+              className="mb-7 border-t border-black/[0.08] pt-5"
+              role="progressbar"
+              aria-label="Generating note details"
+            >
+              <div className="mb-1 text-[10px] font-bold uppercase tracking-[0.14em] text-[#aaa7a5]">
+                Generating note details
+              </div>
+              <div className="h-1 overflow-hidden rounded-full bg-[#e6e1f4]">
+                <div className="h-full w-2/5 animate-pulse bg-[#9175dc]" />
+              </div>
+            </div>
+          )}
+          {generationError && (
+            <p className="mb-7 border-t border-[#e8caca] pt-5 text-xs leading-5 text-[#b45f5f]">
+              {generationError}
+            </p>
+          )}
           <div className="mb-7 border-t border-black/[0.08] pt-5">
             <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.14em] text-[#aaa7a5]">
               Capture with

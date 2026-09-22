@@ -8,16 +8,24 @@ import { loadWhisper, transcribe } from "@/lib/whisper";
 export function useSpeechToText() {
   const [isModelReady, setIsModelReady] = useState(false);
   const [isModelLoading, setIsModelLoading] = useState(true);
+  const [modelProgress, setModelProgress] = useState(0);
   const [modelError, setModelError] = useState<string | null>(null);
   const [isRecording, setIsRecording] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [text, setText] = useState("");
 
   useEffect(() => {
-    loadWhisper()
+    loadWhisper((progress) => {
+      if (typeof progress.progress === "number") {
+        setModelProgress(Math.round(progress.progress));
+      }
+    })
       .then(() => setIsModelReady(true))
       .catch(() => setModelError("The speech model could not be loaded."))
-      .finally(() => setIsModelLoading(false));
+      .finally(() => {
+        setModelProgress(100);
+        setIsModelLoading(false);
+      });
   }, []);
 
   async function start() {
@@ -49,6 +57,7 @@ export function useSpeechToText() {
     stop,
     isModelReady,
     isModelLoading,
+    modelProgress,
     modelError,
     isRecording,
     isTranscribing,

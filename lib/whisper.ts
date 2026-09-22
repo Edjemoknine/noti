@@ -3,9 +3,16 @@ import { pipeline } from "@huggingface/transformers";
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let whisper: any = null;
 
-export async function loadWhisper() {
+type ModelProgress = {
+  status?: string;
+  progress?: number;
+};
+
+export async function loadWhisper(progress_callback?: (progress: ModelProgress) => void) {
   if (!whisper) {
-    whisper = await pipeline("automatic-speech-recognition", "Xenova/whisper-tiny.en");
+    whisper = await pipeline("automatic-speech-recognition", "Xenova/whisper-tiny.en", {
+      progress_callback,
+    });
   }
 
   return whisper;
