@@ -6,17 +6,15 @@ import {
   ArrowUpRight,
   BrainCircuit,
   ChevronDown,
-  FileText,
   Lightbulb,
   MoreHorizontal,
-  Star,
-  Tag,
   Zap,
 } from "lucide-react";
 import Sidebare from "@/components/core/Sidebare";
 import { useRouter } from "next/navigation";
 import Header from "@/components/core/Header";
 import { listNotes } from "@/actions/notes";
+import NoteCard from "@/components/notes/NoteCard";
 
 export default function Page() {
   const [activeNav, setActiveNav] = useState("All notes");
@@ -137,40 +135,7 @@ export default function Page() {
               <div className="p-12 text-center text-sm text-[#999]">Loading notes...</div>
             ) : filteredNotes.length ? (
               filteredNotes.map((note) => (
-                <button
-                  key={note.id}
-                  type="button"
-                  onClick={() => router.push(`/show/${note.id}`)}
-                  className="group flex items-start gap-4 p-5 transition hover:bg-white sm:p-6 w-full cursor-pointer"
-                >
-                  <div
-                    className={`mt-1 flex size-9 shrink-0 items-center justify-center rounded-[10px] ${note.color === "violet" ? "bg-[#eee8fc] text-[#9175dc]" : note.color === "amber" ? "bg-[#fbf0df] text-[#d29b58]" : note.color === "teal" ? "bg-[#e1f2ee] text-[#5eaa99]" : "bg-[#e4eef8] text-[#6c9aca]"}`}
-                  >
-                    <FileText size={16} />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <h3 className="truncate text-[15px] font-semibold tracking-[-0.015em] text-[#3b3736]">
-                        {note.title}
-                      </h3>
-                      {note.starred && <Star size={13} className="fill-[#c59ae9] text-[#c59ae9]" />}
-                    </div>
-                    <p className="mt-1 line-clamp-1 text-sm text-[#979391]">{note.content}</p>
-                    <div className="mt-3 flex items-center gap-3 text-[11px] text-[#b0aca9]">
-                      <span>{note.updatedAt.toLocaleDateString()}</span>
-                      <span className="size-1 rounded-full bg-[#d2cfcc]" />
-                      <span className="flex items-center gap-1">
-                        <Tag size={11} /> {note.tag}
-                      </span>
-                    </div>
-                  </div>
-                  <span
-                    className="mt-1 rounded-lg p-1.5 text-[#c0bdbb] opacity-0 transition hover:bg-black/[0.04] hover:text-[#777] group-hover:opacity-100"
-                    aria-label={`Options for ${note.title}`}
-                  >
-                    <MoreHorizontal size={17} />
-                  </span>
-                </button>
+                <NoteCard key={note.id} note={note} onOpen={(id) => router.push(`/show/${id}`)} />
               ))
             ) : (
               <div className="p-12 text-center text-sm text-[#999]">

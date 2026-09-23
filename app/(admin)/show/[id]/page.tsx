@@ -3,7 +3,17 @@
 import Link from "next/link";
 import { use, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Edit3, FileText, MoreHorizontal, Star, Tag } from "lucide-react";
+import {
+  ArrowLeft,
+  CheckCircle2,
+  Edit3,
+  FileText,
+  Hash,
+  MoreHorizontal,
+  Sparkles,
+  Star,
+  Tag,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { deleteNote, getNote } from "@/actions/notes";
 import Header from "@/components/core/Header";
@@ -82,8 +92,55 @@ export default function ShowNotePage({ params }: { params: Promise<{ id: string 
             <h1 className="font-serif text-[clamp(2.5rem,6vw,5rem)] leading-[0.98] tracking-[-0.045em] text-[#292431]">
               {note.title}
             </h1>
+            {note.summary && (
+              <div className="mt-8 flex gap-3 rounded-xl border border-[#dfe8bc] bg-[#f4f7df] p-4 sm:p-5">
+                <Sparkles className="mt-0.5 shrink-0 text-[#829c26]" size={17} />
+                <p className="text-sm leading-6 text-[#657044]">{note.summary}</p>
+              </div>
+            )}
             <div className="mt-10 whitespace-pre-line font-serif text-lg leading-8 text-[#4c4948]">
               {note.content}
+            </div>
+            <div className="mt-12 grid gap-8 border-t border-black/8 pt-8 sm:grid-cols-[1fr_1.2fr]">
+              <section>
+                <div className="mb-3 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.14em] text-[#aaa7a5]">
+                  <Hash size={13} /> Topics
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {note.tags.length > 0 ? (
+                    note.tags.map((topic) => (
+                      <span
+                        key={topic}
+                        className="rounded-full bg-[#eee8fc] px-2.5 py-1.5 text-xs font-medium text-[#8064c6]"
+                      >
+                        {topic}
+                      </span>
+                    ))
+                  ) : (
+                    <span className="text-xs text-[#aaa7a5]">No topics added</span>
+                  )}
+                </div>
+              </section>
+              <section>
+                <div className="mb-3 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.14em] text-[#aaa7a5]">
+                  <CheckCircle2 size={13} /> Action items
+                </div>
+                {note.actionItems.length > 0 ? (
+                  <ul className="space-y-3">
+                    {note.actionItems.map((actionItem) => (
+                      <li
+                        key={actionItem}
+                        className="flex gap-2.5 text-sm leading-5 text-[#5d5956]"
+                      >
+                        <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-[#afc740]" />
+                        {actionItem}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-xs text-[#aaa7a5]">No action items captured</p>
+                )}
+              </section>
             </div>
             <div className="mt-12 border-t border-black/[0.08] pt-5 text-xs text-[#aaa7a5]">
               Last updated {note.updatedAt.toLocaleDateString()}
