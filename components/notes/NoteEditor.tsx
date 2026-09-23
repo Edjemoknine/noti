@@ -6,11 +6,12 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Check, ChevronDown, Mic, PenLine, Sparkles, Tag, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { createNote, updateNote } from "@/actions/notes";
+import type { ExtractedNote } from "@/actions/notes";
 import type { NoteRecord } from "@/actions/notes";
 import { useSpeechToText } from "@/hooks/useSpeechToText";
 
 type NoteEditorProps = {
-  note?: Pick<NoteRecord, "id" | "title" | "content" | "tag">;
+  note?: Pick<NoteRecord, "id" | "title" | "content">;
   mode?: "create" | "update";
 };
 
@@ -21,15 +22,23 @@ export default function NoteEditor({ note, mode = "create" }: NoteEditorProps) {
   const [inputMode, setInputMode] = useState<"write" | "voice">("write");
   const [title, setTitle] = useState(note?.title ?? "");
   const [body, setBody] = useState(note?.content ?? "");
-  const [tag, setTag] = useState(note?.tag ?? "Inbox");
   const [saved, setSaved] = useState(false);
   const noteBody = inputMode === "voice" && speech.text ? speech.text : body;
 
   const [loading, setLoading] = useState(false);
   const [generationError, setGenerationError] = useState<string | null>(null);
-  const [data, setData] = useState(null);
 
-  const handleExtract = async () => {
+  const saveNote = useMutation({
+    mutationFn: (input: ExtractedNote) =>
+      mode === "update" && note ? updateNote(note.id, { ...input }) : createNote({ ...input }),
+    onSuccess: (savedNote) => {
+      queryClient.invalidateQueries({ queryKey: ["notes"] });
+      setSaved(true);
+      router.push(mode === "update" && savedNote ? `/show/${savedNote.id}` : "/dashboard");
+    },
+  });
+
+  async function handleSave() {
     setLoading(true);
     setGenerationError(null);
     try {
@@ -40,31 +49,13 @@ export default function NoteEditor({ note, mode = "create" }: NoteEditorProps) {
       });
       const result = await res.json();
       if (!res.ok) throw new Error(result.error ?? "Could not generate note details.");
-      setData(result);
+      await saveNote.mutateAsync(result as ExtractedNote);
     } catch (err) {
       console.error(err);
-      setGenerationError(err instanceof Error ? err.message : "Could not generate note details.");
+      setGenerationError(err instanceof Error ? err.message : "Could not save note.");
     } finally {
       setLoading(false);
     }
-  };
-  console.log(data);
-  /* const saveNote = useMutation({
-    mutationFn: (input: { title: string; body: string; tag: string }) =>
-      mode === "update" && note ? updateNote(note.id, input) : createNote(input),
-    onSuccess: (savedNote) => {
-      queryClient.invalidateQueries({ queryKey: ["notes"] });
-      setSaved(true);
-      router.push(mode === "update" && savedNote ? `/show/${savedNote.id}` : "/dashboard");
-    },
-  }); */
-
-  function handleSave() {
-    handleExtract();
-    /*     if (!title.trim() && !noteBody.trim()) return;
-     */
-    /*     saveNote.mutate({ title, body: noteBody, tag });
-     */
   }
 
   function handleModeChange(nextMode: "write" | "voice") {
@@ -278,7 +269,7 @@ export default function NoteEditor({ note, mode = "create" }: NoteEditorProps) {
               </button>
             </div>
           </div>
-          <label className="block border-t border-black/[0.08] pt-5">
+          {/*   <label className="block border-t border-black/[0.08] pt-5">
             <span className="mb-3 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.14em] text-[#aaa7a5]">
               <Tag size={13} /> Collection
             </span>
@@ -299,7 +290,7 @@ export default function NoteEditor({ note, mode = "create" }: NoteEditorProps) {
                 className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#aaa7a5]"
               />
             </span>
-          </label>
+          </label> */}
           {saved && (
             <p className="mt-8 flex items-center gap-2 text-xs text-[#78942b]">
               <Check size={14} />{" "}

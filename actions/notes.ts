@@ -11,6 +11,15 @@ export type NoteInput = {
   tag?: string;
 };
 
+export type ExtractedNote = {
+  title: string;
+  summary: string;
+  content: string;
+  tags: string[];
+  action_items: string[];
+  prompt: string;
+};
+
 export type NoteRecord = typeof notes.$inferSelect;
 
 async function requireUserId() {
@@ -62,11 +71,11 @@ export async function getNote(id: string) {
   return note ?? null;
 }
 
-export async function createNote(input: NoteInput) {
+export async function createNote(input: ExtractedNote & { tag?: string }) {
   const userId = await requireUserId();
   await ensureUser(userId);
   const title = input.title.trim();
-  const body = input.body.trim();
+  const body = input.content.trim();
 
   if (!title && !body) throw new Error("A note needs a title or body.");
 
@@ -77,17 +86,20 @@ export async function createNote(input: NoteInput) {
       userId,
       title: title || "Untitled note",
       content: body,
-      tag: input.tag?.trim() || "Inbox",
+      summary: input.summary.trim() || null,
+      tags: input.tags,
+      actionItems: input.action_items,
+      dataJson: input,
     })
     .returning();
 
   return note;
 }
 
-export async function updateNote(id: string, input: NoteInput) {
+export async function updateNote(id: string, input: ExtractedNote & { tag?: string }) {
   const userId = await requireUserId();
   const title = input.title.trim();
-  const body = input.body.trim();
+  const body = input.content.trim();
 
   if (!title && !body) throw new Error("A note needs a title or body.");
 
@@ -96,7 +108,10 @@ export async function updateNote(id: string, input: NoteInput) {
     .set({
       title: title || "Untitled note",
       content: body,
-      tag: input.tag?.trim() || "Inbox",
+      summary: input.summary.trim() || null,
+      tags: input.tags,
+      actionItems: input.action_items,
+      dataJson: input,
       updatedAt: new Date(),
     })
     .where(and(eq(notes.id, id), eq(notes.userId, userId)))

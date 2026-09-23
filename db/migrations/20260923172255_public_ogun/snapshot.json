@@ -1,17 +1,11 @@
 {
   "version": "8",
   "dialect": "postgres",
-  "id": "f95f0616-3dd5-4fc0-85f6-748614df3560",
+  "id": "a0184843-de26-4246-870d-5e1ae7edec68",
   "prevIds": [
     "00000000-0000-0000-0000-000000000000"
   ],
   "ddl": [
-    {
-      "isRlsEnabled": false,
-      "name": "note_tags",
-      "entityType": "tables",
-      "schema": "public"
-    },
     {
       "isRlsEnabled": false,
       "name": "notes",
@@ -29,32 +23,6 @@
       "name": "users",
       "entityType": "tables",
       "schema": "public"
-    },
-    {
-      "type": "text",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "note_id",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "note_tags"
-    },
-    {
-      "type": "text",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "tag_id",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "note_tags"
     },
     {
       "type": "text",
@@ -109,19 +77,6 @@
       "table": "notes"
     },
     {
-      "type": "jsonb",
-      "typeSchema": null,
-      "notNull": false,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "content_json",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "notes"
-    },
-    {
       "type": "text",
       "typeSchema": null,
       "notNull": false,
@@ -130,6 +85,45 @@
       "generated": null,
       "identity": null,
       "name": "summary",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "notes"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 1,
+      "default": "'{}'",
+      "generated": null,
+      "identity": null,
+      "name": "tags",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "notes"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 1,
+      "default": "'{}'",
+      "generated": null,
+      "identity": null,
+      "name": "action_items",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "notes"
+    },
+    {
+      "type": "jsonb",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "data_json",
       "entityType": "columns",
       "schema": "public",
       "table": "notes"
@@ -332,40 +326,6 @@
     {
       "nameExplicit": false,
       "columns": [
-        "note_id"
-      ],
-      "schemaTo": "public",
-      "tableTo": "notes",
-      "columnsTo": [
-        "id"
-      ],
-      "onUpdate": "NO ACTION",
-      "onDelete": "CASCADE",
-      "name": "note_tags_note_id_notes_id_fkey",
-      "entityType": "fks",
-      "schema": "public",
-      "table": "note_tags"
-    },
-    {
-      "nameExplicit": false,
-      "columns": [
-        "tag_id"
-      ],
-      "schemaTo": "public",
-      "tableTo": "tags",
-      "columnsTo": [
-        "id"
-      ],
-      "onUpdate": "NO ACTION",
-      "onDelete": "CASCADE",
-      "name": "note_tags_tag_id_tags_id_fkey",
-      "entityType": "fks",
-      "schema": "public",
-      "table": "note_tags"
-    },
-    {
-      "nameExplicit": false,
-      "columns": [
         "user_id"
       ],
       "schemaTo": "public",
@@ -396,17 +356,6 @@
       "entityType": "fks",
       "schema": "public",
       "table": "tags"
-    },
-    {
-      "columns": [
-        "note_id",
-        "tag_id"
-      ],
-      "nameExplicit": false,
-      "name": "note_tags_pkey",
-      "entityType": "pks",
-      "schema": "public",
-      "table": "note_tags"
     },
     {
       "columns": [
