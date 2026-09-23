@@ -36,7 +36,7 @@ export default function NoteEditor({ note, mode = "create" }: NoteEditorProps) {
       const res = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: title }),
+        body: JSON.stringify({ transcript: noteBody }),
       });
       const result = await res.json();
       if (!res.ok) throw new Error(result.error ?? "Could not generate note details.");
