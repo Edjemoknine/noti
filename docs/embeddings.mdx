@@ -1,0 +1,44 @@
+                   # RAG Pipeline
+                          |
+                -------------------------- 
+               |                          |
+     Intelligent system               Retrivel system
+
+
+# Ingestion
+1 - proccess documments and store
+2 - the processing requires breaking these documment into small pieces with called chunking.
+3 - fix-size chunking means spllit documment into equal token lengths (ex:500 token per chunk)
+best ways are : semantic chunking , heirarchical chunking
+# Embeddings
+
+1 - convert each chunk to embedding
+2 - every embedding is a numerical vector reperest meaning of a text
+3 - when user query a seach it get embedded for search similarity which called sementic search
+
+# Models
+1 - open ai text-embedding-3-large
+2 - vovage ai voyage-3
+3 - bge large or E5-mistral from HuggingFace
+
+# Vector DB
+1 - pgVector
+2 - chromaDB
+3 - Pinecone
+4 - Qdrant
+
+
+## User 
+```bash
+1 - user submit query
+↓
+2 - Convert query to vector 
+↓
+3 - similarity search in vectorDB
+↓
+4 - Retreive top matches
+↓
+5 - Pass to LLM
+↓
+6 - Accurate response generated 
+```
