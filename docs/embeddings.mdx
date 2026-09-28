@@ -10,8 +10,8 @@
 2 - the processing requires breaking these documment into small pieces with called chunking.
 3 - fix-size chunking means spllit documment into equal token lengths (ex:500 token per chunk)
 best ways are : semantic chunking , heirarchical chunking
-# Embeddings
 
+# Embeddings
 1 - convert each chunk to embedding
 2 - every embedding is a numerical vector reperest meaning of a text
 3 - when user query a seach it get embedded for search similarity which called sementic search
@@ -30,15 +30,29 @@ best ways are : semantic chunking , heirarchical chunking
 
 ## User 
 ```bash
-1 - user submit query
-↓
-2 - Convert query to vector 
-↓
-3 - similarity search in vectorDB
-↓
-4 - Retreive top matches
-↓
-5 - Pass to LLM
-↓
-6 - Accurate response generated 
+User creates note
+       ↓
+Save note in Neon
+       ↓
+Background job
+       ↓
+Chunk note
+       ↓
+Generate embedding
+       ↓
+Store embedding in Neon/pgvector
+       ↓
+────────────────────────────
+User asks:
+"Find my notes about React performance"
+       ↓
+Generate query embedding
+       ↓
+pgvector similarity search
+       ↓
+Top relevant note chunks
+       ↓
+LLM
+       ↓
+Answer
 ```

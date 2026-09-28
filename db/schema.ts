@@ -1,4 +1,14 @@
-import { boolean, jsonb, pgTable, primaryKey, text, timestamp } from "drizzle-orm/pg-core";
+import {
+  boolean,
+  jsonb,
+  pgTable,
+  vector,
+  index,
+  text,
+  timestamp,
+  uuid,
+  integer,
+} from "drizzle-orm/pg-core";
 
 export const users = pgTable("users", {
   id: text("id").primaryKey(),
@@ -26,3 +36,20 @@ export const notes = pgTable("notes", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
+
+export const noteChunks = pgTable(
+  "note_chunks",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    noteId: text("note_id")
+      .notNull()
+      .references(() => notes.id, { onDelete: "cascade" }),
+    content: text("content").notNull(),
+    chunkIndex: integer("chunk_index").notNull(),
+    embedding: vector("embedding", { dimensions: 384 }),
+  },
+  (table) => [
+    index("note_chunks_embedding_idx").using("hnsw", table.embedding.op("vector_cosine_ops")),
+    index("note_chunks_note_id_idx").on(table.noteId),
+  ],
+);
