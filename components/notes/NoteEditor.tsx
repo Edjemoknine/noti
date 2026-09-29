@@ -48,6 +48,8 @@ export default function NoteEditor({ note, mode = "create" }: NoteEditorProps) {
         body: JSON.stringify({ transcript: noteBody }),
       });
       const result = await res.json();
+      console.log({ result });
+
       if (!res.ok) throw new Error(result.error ?? "Could not generate note details.");
       await saveNote.mutateAsync(result as ExtractedNote);
     } catch (err) {
