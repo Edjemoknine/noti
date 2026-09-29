@@ -28,7 +28,8 @@ best ways are : semantic chunking , heirarchical chunking
 4 - Qdrant
 
 
-## User 
+## Embedding
+
 ```bash
 User creates note
        ↓
@@ -42,18 +43,22 @@ Generate embedding
        ↓
 Store embedding in Neon/pgvector
        ↓
-────────────────────────────
-semamtic search 
+```
 
+## Semamtic search 
+
+```bash
 [ ] User query → embedding
 [ ] cosine similarity
 [ ] top K results
 [ ] similarity threshold
 [ ] filter by userId
----------------------------- 
-       ↓
-      RAG
-       ↓
+```
+
+
+## RAG
+
+ ```bash     
 User asks:
 "Find my notes about React performance"
        ↓
@@ -66,6 +71,34 @@ Top relevant note chunks
 LLM
        ↓
 Answer
+```
+
+## Background Jobs
+
+```bash
+Queue
+ ↓
+Worker
+ ↓
+Chunk
+ ↓
+Embed
+ ↓
+Store
+```
+
+## improve retrieval
+
+```bash
+metadata filtering
+      +
+semantic search
+      +
+keyword search
+      +
+reranking
+      +
+conversation history
 ```
 
 
