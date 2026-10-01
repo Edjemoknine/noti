@@ -41,15 +41,30 @@ export const noteChunks = pgTable(
   "note_chunks",
   {
     id: uuid("id").defaultRandom().primaryKey(),
+
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+
     noteId: text("note_id")
       .notNull()
       .references(() => notes.id, { onDelete: "cascade" }),
+
+    title: text("title").notNull(),
+
     content: text("content").notNull(),
+
     chunkIndex: integer("chunk_index").notNull(),
-    embedding: vector("embedding", { dimensions: 384 }),
+
+    embedding: vector("embedding", {
+      dimensions: 384,
+    }),
   },
   (table) => [
     index("note_chunks_embedding_idx").using("hnsw", table.embedding.op("vector_cosine_ops")),
+
+    index("note_chunks_user_id_idx").on(table.userId),
+
     index("note_chunks_note_id_idx").on(table.noteId),
   ],
 );

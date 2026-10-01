@@ -1,21 +1,28 @@
+import { requireUserId } from "@/actions/notes";
 import { db } from "@/db/drizzle";
-import { noteChunks } from "@/db/schema";
-import { cosineDistance, desc, sql } from "drizzle-orm";
+import { noteChunks, notes } from "@/db/schema";
+import { cosineDistance, desc, eq, sql } from "drizzle-orm";
 
 export async function semanticSearch(queryEmbedding: number[], limit = 5) {
-  const distance = cosineDistance(noteChunks.embedding, queryEmbedding);
+  const userId = await requireUserId();
 
+  const distance = cosineDistance(noteChunks.embedding, queryEmbedding);
   const similarity = sql<number>`1 - ${distance}`;
 
-  return db
+  const results = await db
     .select({
       id: noteChunks.id,
       noteId: noteChunks.noteId,
       content: noteChunks.content,
       chunkIndex: noteChunks.chunkIndex,
-      similarity,
+      noteTitle: notes.title,
+      distance,
     })
     .from(noteChunks)
-    .orderBy(desc(similarity))
+    .innerJoin(notes, eq(noteChunks.noteId, notes.id))
+    .where(eq(noteChunks.userId, userId))
+    .orderBy(distance)
     .limit(limit);
+
+  return results;
 }

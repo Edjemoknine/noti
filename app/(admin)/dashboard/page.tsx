@@ -18,7 +18,6 @@ import NoteCard from "@/components/notes/NoteCard";
 
 export default function Page() {
   const [activeNav, setActiveNav] = useState("All notes");
-  const [search, setSearch] = useState("");
   const [mobileNav, setMobileNav] = useState(false);
   const { data: noteList = [], isLoading } = useQuery({
     queryKey: ["notes"],
@@ -30,17 +29,15 @@ export default function Page() {
       noteList.filter((note) => {
         const matchesSearch = `${note.title} ${note.content} ${note.tag}`
           .toLowerCase()
-          .includes(search.toLowerCase());
+          .includes("".toLowerCase());
         const matchesNav =
           activeNav === "All notes" ||
           (activeNav === "Starred" && note.starred) ||
-          (activeNav === "Archive" && note.status === "archived") ||
-          (activeNav === "Product thinking" && note.tag === "Product") ||
-          (activeNav === "Personal" && note.tag === "Personal") ||
-          (activeNav === "Reading list" && note.tag === "Reading");
+          (activeNav === "Archive" && note.status === "archived");
+
         return matchesSearch && matchesNav;
       }),
-    [noteList, search, activeNav],
+    [noteList, activeNav],
   );
 
   const router = useRouter();
@@ -55,7 +52,7 @@ export default function Page() {
       />
 
       <section className="flex-1 pb-6 lg:pb-20 ">
-        <Header search={search} setSearch={setSearch} setMobileNav={setMobileNav} />
+        <Header setMobileNav={setMobileNav} />
         <div className="h-full px-5 py-9 sm:px-8 lg:px-12 lg:py-12 overflow-y-auto *:scrollbar-thin *:scrollbar-track-transparent *:scrollbar-thumb-black/20">
           <div className="mb-9 flex items-start justify-between gap-4">
             <div>
@@ -67,12 +64,6 @@ export default function Page() {
               </h1>
               <p className="mt-2 text-sm text-[#8f8b88]">You have a few ideas waiting for you.</p>
             </div>
-            {/*  <button
-              onClick={() => setShowComposer(true)}
-              className="hidden items-center gap-2 rounded-xl bg-[#1f2825] px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-[#3b3347] sm:flex"
-            >
-              <Plus size={16} /> New note
-            </button> */}
           </div>
           {/*  */}
 

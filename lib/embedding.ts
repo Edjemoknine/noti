@@ -36,3 +36,8 @@ export async function embedQuery(query: string): Promise<number[]> {
   const [v] = await run([`Represent this sentence for searching relevant passages: ${query}`]);
   return v;
 }
+export async function embedSearch(query: string) {
+  const vectors = await embedDocuments([query]);
+
+  return vectors[0];
+}

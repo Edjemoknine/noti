@@ -22,7 +22,7 @@ export type ExtractedNote = {
 
 export type NoteRecord = typeof notes.$inferSelect;
 
-async function requireUserId() {
+export async function requireUserId() {
   const { userId } = await auth();
 
   if (!userId) throw new Error("You must be signed in to manage notes.");
