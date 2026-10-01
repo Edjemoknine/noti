@@ -40,16 +40,16 @@ export default function ShowNotePage({ params }: { params: Promise<{ id: string 
   if (!note) return <div className="p-8 text-sm text-[#777472]">Note not found.</div>;
 
   return (
-    <main className="dashboard-shell flex min-h-screen w-full bg-[#f5f5ef] text-[#1f2825] lg:flex">
+    <main className="h-screen overflow-hidden dashboard-shell flex min-h-screen w-full bg-[#f5f5ef] text-[#1f2825] lg:flex">
       <Sidebare
         activeNav="All notes"
         mobileNav={mobileNav}
         setMobileNav={setMobileNav}
         setActiveNav={() => undefined}
       />
-      <section className="min-w-0 flex-1">
-        <Header search="" setSearch={() => undefined} setMobileNav={setMobileNav} />
-        <div className="mx-auto max-w-[900px] px-5 py-9 sm:px-8 sm:py-12 lg:px-12 lg:py-16">
+      <section className="min-w-0 flex-1 lg:pb-20">
+        <Header setMobileNav={setMobileNav} />
+        <div className=" h-full mx-auto max-w-[900px] px-5 py-9 sm:px-8 sm:py-12 lg:px-12 lg:py-16 overflow-y-auto *:scrollbar-thin *:scrollbar-track-transparent *:scrollbar-thumb-transparent">
           <div className="mb-10 flex items-center justify-between gap-4">
             <Link
               href="/dashboard"

@@ -53,7 +53,7 @@ export default function Page() {
 
       <section className="flex-1 pb-6 lg:pb-20 ">
         <Header setMobileNav={setMobileNav} />
-        <div className="h-full px-5 py-9 sm:px-8 lg:px-12 lg:py-12 overflow-y-auto *:scrollbar-thin *:scrollbar-track-transparent *:scrollbar-thumb-black/20">
+        <div className="h-full px-5 py-9 sm:px-8 lg:px-12 lg:py-12  overflow-y-auto *:scrollbar-thin *:scrollbar-track-transparent *:scrollbar-thumb-black/20">
           <div className="mb-9 flex items-start justify-between gap-4">
             <div>
               <p className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#78942b]">
