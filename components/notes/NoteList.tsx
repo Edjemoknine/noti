@@ -12,6 +12,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import NoteCard from "@/components/notes/NoteCard";
+import NoteListSkeleton from "@/components/notes/NoteListSkeleton";
 
 type NoteListProps = {
   notes: NoteRecord[];
@@ -45,7 +46,7 @@ export default function NoteList({
     <>
       <div className="divide-y divide-black/6 rounded-2xl border border-black/6 bg-white/60">
         {isLoading ? (
-          <div className="p-12 text-center text-sm text-[#999]">Loading notes...</div>
+          <NoteListSkeleton />
         ) : notes.length ? (
           notes.map((note) => <NoteCard key={note.id} note={note} onOpen={onOpen} />)
         ) : (
