@@ -3,7 +3,7 @@ export default function NoteDetailsSkeleton() {
     <div
       role="status"
       aria-label="Loading note details"
-      className="mx-auto h-full max-w-225 overflow-y-auto px-5 py-9 sm:px-8 sm:py-12 lg:px-12 lg:py-16"
+      className="mx-auto max-w-225 px-5 py-9 sm:px-8 sm:py-12 lg:px-12 lg:py-16"
     >
       <div className="mb-10 flex items-center justify-between gap-4 animate-pulse motion-reduce:animate-none">
         <div className="h-4 w-28 rounded bg-black/8" />
