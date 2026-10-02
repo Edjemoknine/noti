@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useUser } from "@clerk/nextjs";
 import {
   ArrowUpRight,
   BrainCircuit,
@@ -17,6 +18,8 @@ import { listNotes, type NoteListView } from "@/actions/notes";
 import NoteList from "@/components/notes/NoteList";
 
 export default function Page() {
+  const { user } = useUser();
+  const firstName = user?.firstName || user?.username || user?.fullName?.split(" ")[0];
   const [activeNav, setActiveNav] = useState("All notes");
   const [mobileNav, setMobileNav] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -58,9 +61,10 @@ export default function Page() {
                 Your second brain, made simple
               </p>
               <h1 className="text-[32px] font-semibold tracking-[-0.05em] text-[#292431] sm:text-[38px]">
-                Good morning, Jordan<span className="text-[#78942b]">.</span>
+                Good morning{firstName ? `, ${firstName}` : ""}
+                <span className="text-[#78942b]">.</span>
               </h1>
-              <p className="mt-2 text-sm text-[#8f8b88]">You have a few ideas waiting for you.</p>
+              <p className="mt-2 text-sm text-[#8f8b88]">Your notes are ready when you are.</p>
             </div>
           </div>
           {/*  */}

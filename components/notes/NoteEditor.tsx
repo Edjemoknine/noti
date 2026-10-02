@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Check, ChevronDown, Mic, PenLine, Sparkles, Tag, X } from "lucide-react";
+import { ArrowLeft, Check, Mic, PenLine, Sparkles, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { createNote, updateNote } from "@/actions/notes";
 import type { ExtractedNote } from "@/actions/notes";

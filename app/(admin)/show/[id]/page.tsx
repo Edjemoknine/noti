@@ -3,22 +3,13 @@
 import Link from "next/link";
 import { use, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  ArrowLeft,
-  CheckCircle2,
-  Edit3,
-  FileText,
-  Hash,
-  MoreHorizontal,
-  Sparkles,
-  Star,
-  Tag,
-} from "lucide-react";
+import { ArrowLeft, CheckCircle2, Edit3, FileText, Hash, Sparkles, Star, Tag } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { deleteNote, getNote } from "@/actions/notes";
 import Header from "@/components/core/Header";
 import Sidebare from "@/components/core/Sidebare";
 import NoteDetailsSkeleton from "@/components/notes/NoteDetailsSkeleton";
+import DeleteNoteDialog from "@/components/notes/DeleteNoteDialog";
 
 export default function ShowNotePage({ params }: { params: Promise<{ id: string }> }) {
   const id = use(params).id;
@@ -67,17 +58,13 @@ export default function ShowNotePage({ params }: { params: Promise<{ id: string 
                 >
                   <Edit3 size={14} /> Edit note
                 </Link>
-                <button
-                  type="button"
-                  aria-label="More options"
-                  onClick={() => {
-                    if (window.confirm("Delete this note?")) removeNote.mutate();
-                  }}
-                  disabled={removeNote.isPending}
-                  className="rounded-lg p-2 text-[#aaa7a5] transition hover:bg-black/[0.04] hover:text-[#5d5956]"
-                >
-                  <MoreHorizontal size={18} />
-                </button>
+                <DeleteNoteDialog
+                  noteTitle={note.title}
+                  isDeleting={removeNote.isPending}
+                  hasError={removeNote.isError}
+                  onDelete={() => removeNote.mutate()}
+                  onClose={() => removeNote.reset()}
+                />
               </div>
             </div>
             <article className="rounded-2xl border border-black/[0.06] bg-white/70 px-6 py-8 sm:px-10 sm:py-12">
@@ -88,7 +75,7 @@ export default function ShowNotePage({ params }: { params: Promise<{ id: string 
                 <span>{note.updatedAt.toLocaleDateString()}</span>
                 <span className="size-1 rounded-full bg-[#d2cfcc]" />
                 <span className="flex items-center gap-1">
-                  <Tag size={11} /> {note.tag}
+                  <Tag size={11} /> {note.tags[0] || "Note"}
                 </span>
                 {note.starred && (
                   <Star size={14} className="ml-auto fill-[#c59ae9] text-[#c59ae9]" />

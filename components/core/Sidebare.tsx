@@ -1,27 +1,14 @@
-import { SignOutButton } from "@clerk/nextjs";
-import {
-  Archive,
-  FileText,
-  Folder,
-  LogOut,
-  MoreHorizontal,
-  Plus,
-  Settings,
-  Sparkles,
-  Star,
-  X,
-} from "lucide-react";
+"use client";
+
+import Image from "next/image";
+import { SignOutButton, useUser } from "@clerk/nextjs";
+import { Archive, FileText, LogOut, Plus, Settings, Sparkles, Star, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Button } from "../ui/button";
 const navItems = [
-  { label: "All notes", icon: FileText, count: 128 },
-  { label: "Starred", icon: Star, count: 12 },
+  { label: "All notes", icon: FileText },
+  { label: "Starred", icon: Star },
   { label: "Archive", icon: Archive },
-];
-const collectionItems = [
-  { label: "Product thinking", color: "text-[#8d7ad0]" },
-  { label: "Personal", color: "text-[#e4a75f]" },
-  { label: "Reading list", color: "text-[#6fb7a5]" },
 ];
 type SidebareProps = {
   mobileNav: boolean;
@@ -31,6 +18,15 @@ type SidebareProps = {
 };
 const Sidebare = ({ mobileNav, setMobileNav, setActiveNav, activeNav }: SidebareProps) => {
   const router = useRouter();
+  const { isLoaded, user } = useUser();
+  const displayName = user?.fullName || user?.username || "Your account";
+  const email = user?.primaryEmailAddress?.emailAddress || "Signed in";
+  const initials = displayName
+    .split(/\s+/)
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
   return (
     <>
       <aside
@@ -69,7 +65,7 @@ const Sidebare = ({ mobileNav, setMobileNav, setActiveNav, activeNav }: Sidebare
             <p className="mb-2 px-3 text-[10px] font-bold uppercase tracking-[0.16em] text-[#aaa8a6]">
               Workspace
             </p>
-            {navItems.map(({ label, icon: Icon, count }) => (
+            {navItems.map(({ label, icon: Icon }) => (
               <button
                 key={label}
                 type="button"
@@ -82,36 +78,9 @@ const Sidebare = ({ mobileNav, setMobileNav, setActiveNav, activeNav }: Sidebare
               >
                 <Icon size={16} strokeWidth={activeNav === label ? 2.2 : 1.8} />
                 <span>{label}</span>
-                {count && <span className="ml-auto text-[11px] text-[#aaa7a5]">{count}</span>}
               </button>
             ))}
           </nav>
-
-          <div className="mt-8 space-y-1">
-            <p className="mb-2 px-3 text-[10px] font-bold uppercase tracking-[0.16em] text-[#aaa8a6]">
-              Collections
-            </p>
-            {collectionItems.map(({ label, color }) => (
-              <button
-                key={label}
-                type="button"
-                onClick={() => {
-                  setActiveNav(label);
-                  setMobileNav(false);
-                }}
-                aria-current={activeNav === label ? "page" : undefined}
-                className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] ${activeNav === label ? "bg-[#efedf4] font-semibold text-[#30293a]" : "text-[#777472] hover:bg-black/[0.03]"}`}
-              >
-                <Folder size={16} className={color} /> {label}
-              </button>
-            ))}
-            <button
-              type="button"
-              className="mt-2 flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] text-[#aaa7a5] hover:bg-black/[0.03]"
-            >
-              <Plus size={15} /> New collection
-            </button>
-          </div>
         </div>
         <div className="mt-auto space-y-1 border-t border-black/[0.06] pt-5">
           <button
@@ -123,14 +92,35 @@ const Sidebare = ({ mobileNav, setMobileNav, setActiveNav, activeNav }: Sidebare
             <Settings size={16} /> Settings
           </button>
           <div className="mt-4 flex items-center gap-3 px-3">
-            <div className="flex size-8 items-center justify-center rounded-full bg-[#d9c9bd] text-xs font-semibold text-[#604e43]">
-              JD
-            </div>
-            <div className="min-w-0">
-              <p className="truncate text-xs font-semibold">Jordan Davis</p>
-              <p className="text-[11px] text-[#aaa7a5]">Personal workspace</p>
-            </div>
-            <MoreHorizontal size={16} className="ml-auto text-[#aaa7a5]" />
+            <button
+              type="button"
+              onClick={() => router.push("/profile")}
+              aria-label="Open profile settings"
+              className="flex min-w-0 flex-1 items-center gap-3 rounded-lg text-left"
+            >
+              {isLoaded && user?.imageUrl ? (
+                <Image
+                  src={user.imageUrl}
+                  alt=""
+                  width={32}
+                  height={32}
+                  unoptimized
+                  className="size-8 shrink-0 rounded-full object-cover"
+                />
+              ) : (
+                <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[#e8edcf] text-xs font-semibold text-[#53631f]">
+                  {isLoaded ? initials || "U" : "…"}
+                </span>
+              )}
+              <span className="min-w-0 flex-1">
+                <span className="block truncate text-xs font-semibold">
+                  {isLoaded ? displayName : "Loading profile"}
+                </span>
+                <span className="mt-0.5 block truncate text-[11px] text-[#aaa7a5]">
+                  {isLoaded ? email : " "}
+                </span>
+              </span>
+            </button>
             <SignOutButton redirectUrl="/">
               <button
                 aria-label="Log out"
