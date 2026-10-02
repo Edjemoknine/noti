@@ -5,6 +5,8 @@ import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Check, Mic, PenLine, Sparkles, X } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { Spinner } from "@/components/ui/spinner";
+import { toast } from "@/components/ui/toast";
 import { createNote, updateNote } from "@/actions/notes";
 import type { ExtractedNote } from "@/actions/notes";
 import type { NoteRecord } from "@/actions/notes";
@@ -20,7 +22,6 @@ export default function NoteEditor({ note, mode = "create" }: NoteEditorProps) {
   const queryClient = useQueryClient();
   const speech = useSpeechToText();
   const [inputMode, setInputMode] = useState<"write" | "voice">("write");
-  const [title, setTitle] = useState(note?.title ?? "");
   const [body, setBody] = useState(note?.content ?? "");
   const [saved, setSaved] = useState(false);
   const noteBody = inputMode === "voice" && speech.text ? speech.text : body;
@@ -34,6 +35,14 @@ export default function NoteEditor({ note, mode = "create" }: NoteEditorProps) {
     onSuccess: (savedNote) => {
       queryClient.invalidateQueries({ queryKey: ["notes"] });
       setSaved(true);
+      toast.add({
+        title: mode === "update" ? "Note updated" : "Note created",
+        description:
+          mode === "update"
+            ? "Your changes have been saved."
+            : "Your note is ready in your workspace.",
+        type: "success",
+      });
       router.push(mode === "update" && savedNote ? `/show/${savedNote.id}` : "/dashboard");
     },
   });
@@ -54,7 +63,13 @@ export default function NoteEditor({ note, mode = "create" }: NoteEditorProps) {
       await saveNote.mutateAsync(result as ExtractedNote);
     } catch (err) {
       console.error(err);
-      setGenerationError(err instanceof Error ? err.message : "Could not save note.");
+      const message = err instanceof Error ? err.message : "Could not save note.";
+      setGenerationError(message);
+      toast.add({
+        title: mode === "update" ? "Could not update note" : "Could not create note",
+        description: message,
+        type: "error",
+      });
     } finally {
       setLoading(false);
     }
@@ -85,10 +100,17 @@ export default function NoteEditor({ note, mode = "create" }: NoteEditorProps) {
           <button
             type="button"
             onClick={handleSave}
-            /*             disabled={saveNote.isPending || (!title.trim() && !noteBody.trim())}
-             */ className="flex h-9 items-center gap-2 rounded-lg bg-[#1f2825] px-3.5 text-xs font-medium text-white transition hover:bg-[#3b3347] disabled:cursor-not-allowed disabled:opacity-40"
+            disabled={loading}
+            className="flex h-9 items-center gap-2 rounded-lg bg-[#1f2825] px-3.5 text-xs font-medium text-white transition hover:bg-[#3b3347] disabled:cursor-not-allowed disabled:opacity-40"
           >
-            <Check size={14} /> {mode === "update" ? "Save changes" : "Save note"}
+            {loading ? <Spinner className="size-3.5" /> : <Check size={14} />}
+            {loading
+              ? mode === "update"
+                ? "Updating..."
+                : "Saving..."
+              : mode === "update"
+                ? "Save changes"
+                : "Save note"}
           </button>
         </div>
       </header>
@@ -100,16 +122,9 @@ export default function NoteEditor({ note, mode = "create" }: NoteEditorProps) {
               <span className="size-1.5 rounded-full bg-[#afc740]" />
               {mode === "update" ? "Refine your thought" : "Quick capture"}
             </p>
-            <input
-              value={title}
-              onChange={(event) => {
-                setTitle(event.target.value);
-                setSaved(false);
-              }}
-              placeholder="Give this thought a name"
-              aria-label="Note title"
-              className="w-full border-0 bg-transparent p-0 font-serif text-[clamp(2.25rem,5vw,4.25rem)] leading-[0.98] tracking-[-0.04em] text-[#292431] outline-none placeholder:text-[#c5c2bd]"
-            />
+            <h1 className="w-full border-0 bg-transparent p-0 font-serif text-[clamp(2.25rem,5vw,4.25rem)] leading-[0.98] tracking-[-0.04em] text-[#dcdade]">
+              What&apos;s on your mind?
+            </h1>
           </div>
           <div className="mb-5 flex items-center justify-between border-b border-black/[0.08] pb-3">
             <div
@@ -301,11 +316,10 @@ export default function NoteEditor({ note, mode = "create" }: NoteEditorProps) {
                 : "Your note is ready in your workspace."}
             </p>
           )}
-          {(title || noteBody) && (
+          {noteBody && (
             <button
               type="button"
               onClick={() => {
-                setTitle("");
                 setBody("");
                 setSaved(false);
               }}
