@@ -49,7 +49,7 @@ export default function NoteCard({ note, onOpen }: NoteCardProps) {
           <span>{note.updatedAt.toLocaleDateString()}</span>
           <span className="size-1 rounded-full bg-[#d2cfcc]" />
           <span className="flex items-center gap-1">
-            <Tag size={11} /> {note.tag}
+            <Tag size={11} /> {note.tags[0] || "Note"}
           </span>
         </div>
       </div>

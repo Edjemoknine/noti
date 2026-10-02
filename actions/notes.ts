@@ -1,7 +1,7 @@
 "use server";
 
 import { auth, currentUser } from "@clerk/nextjs/server";
-import { and, desc, eq } from "drizzle-orm";
+import { and, count, desc, eq } from "drizzle-orm";
 import { db } from "@/db/drizzle";
 import { notes, users } from "@/db/schema";
 
@@ -21,6 +21,7 @@ export type ExtractedNote = {
 };
 
 export type NoteRecord = typeof notes.$inferSelect;
+export type NoteListView = "all" | "starred" | "archive" | "none";
 
 export async function requireUserId() {
   const { userId } = await auth();
@@ -53,10 +54,40 @@ async function ensureUser(userId: string) {
     });
 }
 
-export async function listNotes() {
+export async function listNotes({
+  page = 1,
+  view = "all",
+}: { page?: number; view?: NoteListView } = {}) {
   const userId = await requireUserId();
+  const pageSize = 5;
+  const currentPage = Number.isSafeInteger(page) && page > 0 ? page : 1;
 
-  return db.select().from(notes).where(eq(notes.userId, userId)).orderBy(desc(notes.updatedAt));
+  if (view === "none") {
+    return { notes: [], totalCount: 0, page: 1, pageCount: 0 };
+  }
+
+  const conditions = [eq(notes.userId, userId)];
+  if (view === "starred") conditions.push(eq(notes.starred, true));
+  if (view === "archive") conditions.push(eq(notes.status, "archived"));
+  const where = and(...conditions);
+
+  const [pageNotes, [countResult]] = await Promise.all([
+    db
+      .select()
+      .from(notes)
+      .where(where)
+      .orderBy(desc(notes.updatedAt), desc(notes.id))
+      .limit(pageSize)
+      .offset((currentPage - 1) * pageSize),
+    db.select({ totalCount: count() }).from(notes).where(where),
+  ]);
+
+  return {
+    notes: pageNotes,
+    totalCount: countResult.totalCount,
+    page: currentPage,
+    pageCount: Math.ceil(countResult.totalCount / pageSize),
+  };
 }
 
 export async function getNote(id: string) {

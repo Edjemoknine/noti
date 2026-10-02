@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   ArrowUpRight,
@@ -13,32 +13,30 @@ import {
 import Sidebare from "@/components/core/Sidebare";
 import { useRouter } from "next/navigation";
 import Header from "@/components/core/Header";
-import { listNotes } from "@/actions/notes";
-import NoteCard from "@/components/notes/NoteCard";
+import { listNotes, type NoteListView } from "@/actions/notes";
+import NoteList from "@/components/notes/NoteList";
 
 export default function Page() {
   const [activeNav, setActiveNav] = useState("All notes");
   const [mobileNav, setMobileNav] = useState(false);
-  const { data: noteList = [], isLoading } = useQuery({
-    queryKey: ["notes"],
-    queryFn: listNotes,
+  const [currentPage, setCurrentPage] = useState(1);
+  const noteView: NoteListView =
+    activeNav === "All notes"
+      ? "all"
+      : activeNav === "Starred"
+        ? "starred"
+        : activeNav === "Archive"
+          ? "archive"
+          : "none";
+  const { data: notePage, isLoading } = useQuery({
+    queryKey: ["notes", noteView, currentPage],
+    queryFn: () => listNotes({ page: currentPage, view: noteView }),
   });
 
-  const filteredNotes = useMemo(
-    () =>
-      noteList.filter((note) => {
-        const matchesSearch = `${note.title} ${note.content} ${note.tag}`
-          .toLowerCase()
-          .includes("".toLowerCase());
-        const matchesNav =
-          activeNav === "All notes" ||
-          (activeNav === "Starred" && note.starred) ||
-          (activeNav === "Archive" && note.status === "archived");
-
-        return matchesSearch && matchesNav;
-      }),
-    [noteList, activeNav],
-  );
+  const handleActiveNavChange = (value: string) => {
+    setActiveNav(value);
+    setCurrentPage(1);
+  };
 
   const router = useRouter();
 
@@ -48,7 +46,7 @@ export default function Page() {
         activeNav={activeNav}
         mobileNav={mobileNav}
         setMobileNav={setMobileNav}
-        setActiveNav={setActiveNav}
+        setActiveNav={handleActiveNavChange}
       />
 
       <section className="flex-1 pb-6 lg:pb-20 ">
@@ -121,19 +119,14 @@ export default function Page() {
               <MoreHorizontal size={18} />
             </button>
           </div>
-          <div className="divide-y divide-black/[0.06] rounded-2xl border border-black/[0.06] bg-white/60">
-            {isLoading ? (
-              <div className="p-12 text-center text-sm text-[#999]">Loading notes...</div>
-            ) : filteredNotes.length ? (
-              filteredNotes.map((note) => (
-                <NoteCard key={note.id} note={note} onOpen={(id) => router.push(`/show/${id}`)} />
-              ))
-            ) : (
-              <div className="p-12 text-center text-sm text-[#999]">
-                No notes match your search.
-              </div>
-            )}
-          </div>
+          <NoteList
+            notes={notePage?.notes ?? []}
+            isLoading={isLoading}
+            page={currentPage}
+            pageCount={notePage?.pageCount ?? 0}
+            onPageChange={setCurrentPage}
+            onOpen={(id) => router.push(`/show/${id}`)}
+          />
 
           <div className="mt-10 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-[#e8e2d5] bg-[#fcf8ef] px-5 py-4 sm:px-6">
             <div className="flex items-center gap-3">
