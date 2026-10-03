@@ -68,7 +68,7 @@ export default function ShowNotePage({ params }: { params: Promise<{ id: string 
               </span>
               {note.starred && <Star size={14} className="ml-auto fill-[#c59ae9] text-[#c59ae9]" />}
             </div>
-            <h1 className="font-serif text-[clamp(2.5rem,6vw,5rem)] leading-[0.98] tracking-[-0.045em] text-[#292431]">
+            <h1 className="font-serif text-[clamp(2rem,4vw,3rem)] leading-[0.98] tracking-[-0.045em] text-[#292431]">
               {note.title}
             </h1>
             {note.summary && (

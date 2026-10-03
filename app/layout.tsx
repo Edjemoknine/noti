@@ -17,6 +17,11 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Noti — Make space for what matters",
   description: "Noti turns scattered thoughts into clear, useful notes.",
+  icons: {
+    icon: "/noti.png",
+    shortcut: "/noti.png",
+    apple: "/noti.png",
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

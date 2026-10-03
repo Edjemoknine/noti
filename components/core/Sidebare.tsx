@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { SignOutButton, useUser } from "@clerk/nextjs";
-import { Archive, FileText, LogOut, Plus, Settings, Sparkles, Star, X } from "lucide-react";
+import { Archive, FileText, LogOut, Plus, Settings, Star, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Button } from "../ui/button";
 const navItems = [
@@ -36,7 +36,13 @@ const Sidebare = ({ mobileNav, setMobileNav, setActiveNav, activeNav }: Sidebare
           <div className="mb-9 flex items-center justify-between px-2">
             <div className="flex items-center gap-2.5">
               <div className="flex size-8 items-center justify-center rounded-[10px] bg-[#282330] text-white shadow-sm">
-                <Sparkles size={16} />
+                <Image
+                  src="/noti.png"
+                  alt="Noti logo"
+                  width={32}
+                  height={32}
+                  className="size-8 rounded-[10px] object-cover"
+                />
               </div>
               <span className="text-[17px] font-semibold tracking-[-0.03em]">
                 noti<span className="text-[#78942b]">.</span>

@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import Image from "next/image";
+import { useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Check, Mic, PenLine, Sparkles, X } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -17,6 +18,12 @@ type NoteEditorProps = {
   mode?: "create" | "update";
 };
 
+const LOADING_STEPS = [
+  "Reading your note…",
+  "Finding the key ideas…",
+  "Writing a title and summary…",
+];
+
 export default function NoteEditor({ note, mode = "create" }: NoteEditorProps) {
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -28,6 +35,7 @@ export default function NoteEditor({ note, mode = "create" }: NoteEditorProps) {
 
   const [loading, setLoading] = useState(false);
   const [generationError, setGenerationError] = useState<string | null>(null);
+  const [stepIndex, setStepIndex] = useState(0);
 
   const saveNote = useMutation({
     mutationFn: (input: ExtractedNote) =>
@@ -47,6 +55,22 @@ export default function NoteEditor({ note, mode = "create" }: NoteEditorProps) {
     },
   });
 
+  // Step through the loading messages while the note is being generated
+  useEffect(() => {
+    if (!loading) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setStepIndex(0);
+      return;
+    }
+    const id = setInterval(
+      () => setStepIndex((i) => Math.min(i + 1, LOADING_STEPS.length - 1)),
+      2500,
+    );
+    return () => clearInterval(id);
+  }, [loading]);
+
+  const loadingLabel = saveNote.isPending ? "Saving your note…" : LOADING_STEPS[stepIndex];
+
   async function handleSave() {
     setLoading(true);
     setGenerationError(null);
@@ -57,7 +81,6 @@ export default function NoteEditor({ note, mode = "create" }: NoteEditorProps) {
         body: JSON.stringify({ transcript: noteBody }),
       });
       const result = await res.json();
-      console.log({ result });
 
       if (!res.ok) throw new Error(result.error ?? "Could not generate note details.");
       await saveNote.mutateAsync(result as ExtractedNote);
@@ -69,6 +92,7 @@ export default function NoteEditor({ note, mode = "create" }: NoteEditorProps) {
         title: mode === "update" ? "Could not update note" : "Could not create note",
         description: message,
         type: "error",
+        timeout: 1000,
       });
     } finally {
       setLoading(false);
@@ -115,7 +139,7 @@ export default function NoteEditor({ note, mode = "create" }: NoteEditorProps) {
         </div>
       </header>
 
-      <div className="mx-auto grid w-full max-w-[1180px] gap-10 px-5 py-9 sm:px-8 sm:py-12 lg:grid-cols-[minmax(0,1fr)_280px] lg:px-12 lg:py-16">
+      <div className="relative mx-auto grid w-full max-w-[1180px] gap-10 px-5 py-9 sm:px-8 sm:py-12 lg:grid-cols-[minmax(0,1fr)_280px] lg:px-12 lg:py-16">
         <section>
           <div className="mb-10">
             <p className="mb-3 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.16em] text-[#78942b]">
@@ -206,20 +230,58 @@ export default function NoteEditor({ note, mode = "create" }: NoteEditorProps) {
               </button>
             </div>
           )}
-          <textarea
-            value={noteBody}
-            onChange={(event) => {
-              setBody(event.target.value);
-              setSaved(false);
-            }}
-            placeholder={
-              inputMode === "voice"
-                ? "Your transcription will appear here..."
-                : "Start with a sentence, a question, or a feeling..."
-            }
-            aria-label="Note body"
-            className="min-h-[360px] w-full resize-none border-0 bg-transparent p-0 font-serif text-lg leading-8 text-[#4c4948] outline-none placeholder:text-[#b8b4b0] sm:min-h-[430px]"
-          />
+
+          {/* Note area: relative so the loading overlay is scoped to it */}
+          <div className="relative" aria-busy={loading}>
+            <textarea
+              value={noteBody}
+              onChange={(event) => {
+                setBody(event.target.value);
+                setSaved(false);
+              }}
+              readOnly={loading}
+              placeholder={
+                inputMode === "voice"
+                  ? "Your transcription will appear here..."
+                  : "Start with a sentence, a question, or a feeling..."
+              }
+              aria-label="Note body"
+              className={`min-h-[360px] w-full resize-none border-0 bg-transparent p-0 font-serif text-lg leading-8 text-[#4c4948] outline-none transition-opacity duration-300 placeholder:text-[#b8b4b0] sm:min-h-[430px] ${loading ? "opacity-60" : ""}`}
+            />
+
+            {/* Screen readers: always mounted so each step is announced */}
+            <p className="sr-only" role="status" aria-live="polite">
+              {loading ? loadingLabel : ""}
+            </p>
+
+            {/* Loading overlay: scoped to the note, fades in and out */}
+            <div
+              aria-hidden="true"
+              className={`absolute inset-0 z-10 flex items-center justify-center rounded-xl transition-opacity duration-300 ${
+                loading ? "opacity-100" : "pointer-events-none opacity-0"
+              }`}
+            >
+              {/* Light frosted veil: the note stays readable underneath */}
+              <div className="absolute inset-0 rounded-xl bg-[#f5f6f1]/55 backdrop-blur-[2px]" />
+
+              {/* Soft lime glow, kept small and subtle */}
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(198,244,50,0.18)_0%,transparent_60%)]" />
+
+              {/* White card so the lime logo stands out */}
+              <div className="relative flex flex-col items-center gap-1.5 rounded-2xl border border-black/[0.06] bg-white/90 px-9 py-6 shadow-[0_8px_30px_rgba(31,40,37,0.08)]">
+                <Image
+                  src="/noti-n-loader.svg"
+                  alt=""
+                  width={200}
+                  height={200}
+                  unoptimized
+                  className="size-24"
+                />
+                <p className="text-sm font-medium text-[#4c4948]">{loadingLabel}</p>
+                <p className="text-xs text-[#9b9794]">This usually takes a few seconds</p>
+              </div>
+            </div>
+          </div>
         </section>
 
         <aside className="border-t border-black/[0.08] pt-6 lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0">
@@ -238,20 +300,6 @@ export default function NoteEditor({ note, mode = "create" }: NoteEditorProps) {
               </p>
             </div>
           </div>
-          {loading && (
-            <div
-              className="mb-7 border-t border-black/[0.08] pt-5"
-              role="progressbar"
-              aria-label="Generating note details"
-            >
-              <div className="mb-1 text-[10px] font-bold uppercase tracking-[0.14em] text-[#aaa7a5]">
-                Generating note details
-              </div>
-              <div className="h-1 overflow-hidden rounded-full bg-[#e6e1f4]">
-                <div className="h-full w-2/5 animate-pulse bg-[#9175dc]" />
-              </div>
-            </div>
-          )}
           {generationError && (
             <p className="mb-7 border-t border-[#e8caca] pt-5 text-xs leading-5 text-[#b45f5f]">
               {generationError}
@@ -286,28 +334,7 @@ export default function NoteEditor({ note, mode = "create" }: NoteEditorProps) {
               </button>
             </div>
           </div>
-          {/*   <label className="block border-t border-black/[0.08] pt-5">
-            <span className="mb-3 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.14em] text-[#aaa7a5]">
-              <Tag size={13} /> Collection
-            </span>
-            <span className="relative block">
-              <select
-                value={tag}
-                onChange={(event) => setTag(event.target.value)}
-                className="h-10 w-full appearance-none rounded-lg border border-black/[0.08] bg-white/70 px-3 text-xs text-[#5d5956] outline-none focus:border-[#b5a6e6]"
-              >
-                <option>Inbox</option>
-                <option>Product</option>
-                <option>Ideas</option>
-                <option>Personal</option>
-                <option>Reading</option>
-              </select>
-              <ChevronDown
-                size={14}
-                className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#aaa7a5]"
-              />
-            </span>
-          </label> */}
+
           {saved && (
             <p className="mt-8 flex items-center gap-2 text-xs text-[#78942b]">
               <Check size={14} />{" "}
