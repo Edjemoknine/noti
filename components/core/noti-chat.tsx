@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import {
   CheckIcon,
   ChevronDownIcon,
@@ -31,7 +32,7 @@ import { Textarea } from "@/components/ui/textarea";
 
 /* ---------- types ---------- */
 
-export type Source = { title: string; url?: string };
+export type Source = { title: string; noteId?: string; url?: string };
 
 export type ChatMessage = {
   id: string;
@@ -53,11 +54,6 @@ export type AskFn = (
   signal: AbortSignal,
 ) => Promise<void>;
 
-/* ---------- RAG adapter: the only part that talks to your backend ---------- */
-// Expects POST /api/chat to stream plain text, and to send retrieved sources
-// in an `x-sources` header (URL-encoded JSON) before the first token.
-// Swap this for the AI SDK, SSE, or anything else you use.
-
 const askNoti: AskFn = async (question, history, { onToken, onSources }, signal) => {
   const res = await fetch("/api/chat", {
     method: "POST",
@@ -72,6 +68,8 @@ const askNoti: AskFn = async (question, history, { onToken, onSources }, signal)
 
   const header = res.headers.get("x-sources");
   if (header) onSources(JSON.parse(decodeURIComponent(header)));
+
+  console.log({ res });
 
   const reader = res.body.getReader();
   const decoder = new TextDecoder();
@@ -318,8 +316,16 @@ function Sources({ sources }: { sources: Source[] }) {
       <CollapsibleContent>
         <ul className="mt-2 flex flex-col gap-1">
           {sources.map((s) => (
-            <li key={s.title}>
-              {s.url ? (
+            <li key={s.noteId ?? s.url ?? s.title}>
+              {s.noteId ? (
+                <Link
+                  href={`/show/${s.noteId}`}
+                  className="text-muted-foreground hover:text-foreground flex items-center gap-1.5 text-xs underline-offset-2 hover:underline"
+                >
+                  <FileTextIcon className="size-3 shrink-0" />
+                  {s.title}
+                </Link>
+              ) : s.url ? (
                 <a
                   href={s.url}
                   target="_blank"
