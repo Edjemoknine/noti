@@ -6,7 +6,8 @@ import { cosineDistance, eq } from "drizzle-orm";
 export async function semanticSearch(queryEmbedding: number[], limit = 5) {
   const userId = await requireUserId();
 
-  const distance = cosineDistance(noteChunks.embedding, queryEmbedding);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const distance = cosineDistance(noteChunks.embedding, queryEmbedding) as any;
 
   const results = await db
     .select({
