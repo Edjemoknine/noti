@@ -8,7 +8,15 @@
     "start": "next start",
     "lint": "eslint",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx,mjs,cjs}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,css,scss,yml,yaml}": "prettier --write"
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",
@@ -39,6 +47,8 @@
     "drizzle-kit": "^1.0.0-rc.4",
     "eslint": "^9",
     "eslint-config-next": "16.3.5",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.5.2",
     "prettier": "^3.6.2",
     "tailwindcss": "^4",
     "tsx": "^4.23.15",

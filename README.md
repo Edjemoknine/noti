@@ -36,7 +36,7 @@ Object storage
 
 ## Architecture
 
-```bash
+````bash
                     ┌───────────────┐
                     │    Next.js    │
                     │   Web Client  │
@@ -61,3 +61,15 @@ Object storage
    PostgreSQL
     + Drizzle
     ```
+
+```bash
+Phase 1  CRUD                         ✅
+Phase 2  Voice + AI extraction       ✅
+Phase 3  RAG                         ✅
+Phase 4  Chat + citations + stream  ✅
+Phase 5  Background jobs             ← NEXT
+Phase 6  Queue + workers + retries
+Phase 7  Hybrid search / reranking
+Phase 8  Advanced AI workflows
+Phase 9  Production hardening
+````
