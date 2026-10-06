@@ -1,10 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  serverExternalPackages: ["onnxruntime-node"],
-
   outputFileTracingIncludes: {
     "/**/*": ["./models/**/*"],
   },
+
+  serverExternalPackages: ["sharp"],
 };
+
 export default nextConfig;
