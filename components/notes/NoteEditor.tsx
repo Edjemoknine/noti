@@ -124,7 +124,7 @@ export default function NoteEditor({ note, mode = "create" }: NoteEditorProps) {
           <button
             type="button"
             onClick={handleSave}
-            disabled={loading}
+            disabled={loading || speech.isTranscribing}
             className="flex h-9 items-center gap-2 rounded-lg bg-[#1f2825] px-3.5 text-xs font-medium text-white transition hover:bg-[#3b3347] disabled:cursor-not-allowed disabled:opacity-40"
           >
             {loading ? <Spinner className="size-3.5" /> : <Check size={14} />}
@@ -232,22 +232,44 @@ export default function NoteEditor({ note, mode = "create" }: NoteEditorProps) {
           )}
 
           {/* Note area: relative so the loading overlay is scoped to it */}
-          <div className="relative" aria-busy={loading}>
-            <textarea
-              value={noteBody}
-              onChange={(event) => {
-                setBody(event.target.value);
-                setSaved(false);
-              }}
-              readOnly={loading}
-              placeholder={
-                inputMode === "voice"
-                  ? "Your transcription will appear here..."
-                  : "Start with a sentence, a question, or a feeling..."
-              }
-              aria-label="Note body"
-              className={`min-h-[360px] w-full resize-none border-0 bg-transparent p-0 font-serif text-lg leading-8 text-[#4c4948] outline-none transition-opacity duration-300 placeholder:text-[#b8b4b0] sm:min-h-[430px] ${loading ? "opacity-60" : ""}`}
-            />
+          <div className="relative" aria-busy={loading || speech.isTranscribing}>
+            {speech.isTranscribing ? (
+              <div
+                role="status"
+                aria-label="Transcribing voice"
+                className="pointer-events-none absolute left-2 top-2 z-20 flex items-center gap-1 rounded-full bg-[#f5f5ef]/90 px-2.5 py-2"
+              >
+                <span className="sr-only">Transcribing voice...</span>
+                <span
+                  aria-hidden="true"
+                  className="size-1.5 animate-bounce rounded-full bg-[#829c26] [animation-delay:-0.3s]"
+                />
+                <span
+                  aria-hidden="true"
+                  className="size-1.5 animate-bounce rounded-full bg-[#829c26] [animation-delay:-0.15s]"
+                />
+                <span
+                  aria-hidden="true"
+                  className="size-1.5 animate-bounce rounded-full bg-[#829c26]"
+                />
+              </div>
+            ) : (
+              <textarea
+                value={noteBody}
+                onChange={(event) => {
+                  setBody(event.target.value);
+                  setSaved(false);
+                }}
+                readOnly={loading || speech.isTranscribing}
+                placeholder={
+                  inputMode === "voice"
+                    ? "Your transcription will appear here..."
+                    : "Start with a sentence, a question, or a feeling..."
+                }
+                aria-label="Note body"
+                className={`min-h-[360px] w-full resize-none border-0 bg-transparent p-0 font-serif text-lg leading-8 text-[#4c4948] outline-none transition-opacity duration-300 placeholder:text-[#b8b4b0] sm:min-h-[430px] ${loading ? "opacity-60" : ""}`}
+              />
+            )}
 
             {/* Screen readers: always mounted so each step is announced */}
             <p className="sr-only" role="status" aria-live="polite">
