@@ -3,8 +3,10 @@ import path from "node:path";
 import { pipeline, env, type FeatureExtractionPipeline } from "@huggingface/transformers";
 
 // Load from the bundled folder, never hit the network
-env.localModelPath = path.join(process.cwd(), "models");
+
 env.allowRemoteModels = false;
+env.allowLocalModels = true;
+env.localModelPath = path.join(process.cwd(), "models");
 
 const MODEL = "Xenova/bge-small-en-v1.5";
 const BATCH = 16;
