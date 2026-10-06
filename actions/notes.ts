@@ -145,6 +145,7 @@ export async function createNote(input: ExtractedNote & { tag?: string }) {
       title: note.title,
       content: note.content,
       summary: note.summary,
+      userId: note.userId,
     }),
   );
 

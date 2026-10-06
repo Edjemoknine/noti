@@ -1,19 +1,16 @@
-// lib/embed-note.ts
 import { eq } from "drizzle-orm";
 import { noteChunks } from "@/db/schema";
 import { chunkNote } from "./chunk";
 import { embedDocuments } from "./embedding";
 import { db } from "@/db/drizzle";
-import { requireUserId } from "@/actions/notes";
 
 export async function embedNote(note: {
   id: string;
   title: string;
   content: string;
   summary: string | null;
+  userId: string;
 }) {
-  const userId = await requireUserId();
-
   const chunks = chunkNote(note.title, note.content, note.summary);
   const vectors = await embedDocuments(chunks);
 
@@ -22,7 +19,7 @@ export async function embedNote(note: {
   await db.insert(noteChunks).values(
     chunks.map((content, i) => ({
       noteId: note.id,
-      userId, // Assuming userId is the same as note.id for this example; adjust as needed
+      userId: note.userId,
       chunkIndex: i,
       title: note.title,
       content,

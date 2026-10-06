@@ -1,3 +1,4 @@
+import "server-only";
 import path from "node:path";
 import { pipeline, env, type FeatureExtractionPipeline } from "@huggingface/transformers";
 
