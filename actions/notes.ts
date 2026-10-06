@@ -139,7 +139,7 @@ export async function createNote(input: ExtractedNote & { tag?: string }) {
     .returning();
 
   // Runs after the response is sent, so the user doesn't wait for embedding
-  after(() =>
+  /*  after(() =>
     embedNoteSafe({
       id: note.id,
       title: note.title,
@@ -147,7 +147,7 @@ export async function createNote(input: ExtractedNote & { tag?: string }) {
       summary: note.summary,
       userId: note.userId,
     }),
-  );
+  ); */
 
   return note;
 }
