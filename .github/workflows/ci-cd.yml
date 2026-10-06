@@ -39,25 +39,25 @@ jobs:
 
       - name: Verify database environment
         run: |
-          node -e "
-            const url = process.env.DATABASE_URL;
+          node <<'NODE'
+          const url = process.env.DATABASE_URL;
 
-            if (!url) {
-              console.error('DATABASE_URL is missing');
-              process.exit(1);
-            }
+          if (!url) {
+            console.error("DATABASE_URL is missing");
+            process.exit(1);
+          }
 
-            try {
-              const parsed = new URL(url);
+          try {
+            const parsed = new URL(url);
 
-              console.log('DATABASE_URL protocol:', parsed.protocol);
-              console.log('DATABASE_URL host:', parsed.host);
-              console.log('DATABASE_URL is valid');
-            } catch {
-              console.error('DATABASE_URL is not a valid URL');
-              process.exit(1);
-            }
-          "
+            console.log("DATABASE_URL protocol:", parsed.protocol);
+            console.log("DATABASE_URL host:", parsed.host);
+            console.log("DATABASE_URL is valid");
+          } catch {
+            console.error("DATABASE_URL is not a valid URL");
+            process.exit(1);
+          }
+          NODE
 
       - name: Run ESLint
         run: npm run lint
@@ -119,6 +119,54 @@ jobs:
             --yes \
             --environment=production \
             --token="$VERCEL_TOKEN"
+
+      - name: Validate pulled Vercel database URL
+        run: |
+          node <<'NODE'
+          const fs = require("fs");
+
+          const file = ".vercel/.env.production.local";
+
+          if (!fs.existsSync(file)) {
+            console.error(`${file} does not exist`);
+            process.exit(1);
+          }
+
+          const content = fs.readFileSync(file, "utf8");
+
+          const line = content
+            .split("\n")
+            .find((line) => line.startsWith("DATABASE_URL="));
+
+          if (!line) {
+            console.error(
+              "DATABASE_URL was not found in Vercel production environment"
+            );
+            process.exit(1);
+          }
+
+          let value = line.slice("DATABASE_URL=".length).trim();
+
+          // Remove surrounding quotes if present.
+          value = value.replace(/^['"]|['"]$/g, "");
+
+          console.log("DATABASE_URL found");
+          console.log("Length:", value.length);
+
+          try {
+            const url = new URL(value);
+
+            console.log("Protocol:", url.protocol);
+            console.log("Host:", url.host);
+            console.log("Pathname:", url.pathname);
+            console.log("Valid URL: yes");
+          } catch {
+            console.error(
+              "Vercel DATABASE_URL is NOT a valid URL"
+            );
+            process.exit(1);
+          }
+          NODE
 
       - name: Build for production
         run: |
