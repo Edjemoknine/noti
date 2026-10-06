@@ -5,9 +5,10 @@ import { use } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, CheckCircle2, Edit3, FileText, Hash, Sparkles, Star, Tag } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { deleteNote, getNote } from "@/actions/notes";
+import { deleteNote, getNote, setNoteStarred } from "@/actions/notes";
 import NoteDetailsSkeleton from "@/components/notes/NoteDetailsSkeleton";
 import DeleteNoteDialog from "@/components/notes/DeleteNoteDialog";
+import { toast } from "@/components/ui/toast";
 
 export default function ShowNotePage({ params }: { params: Promise<{ id: string }> }) {
   const id = use(params).id;
@@ -22,6 +23,31 @@ export default function ShowNotePage({ params }: { params: Promise<{ id: string 
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["notes"] });
       router.push("/dashboard");
+    },
+  });
+  const updateStarred = useMutation({
+    mutationFn: async (starred: boolean) => {
+      const updatedNote = await setNoteStarred(id, starred);
+      if (!updatedNote) throw new Error("Note not found or no longer available.");
+      return updatedNote;
+    },
+    onSuccess: (updatedNote) => {
+      queryClient.setQueryData(["notes", id], updatedNote);
+      queryClient.invalidateQueries({ queryKey: ["notes"] });
+      toast.add({
+        title: updatedNote.starred ? "Note starred" : "Note unstarred",
+        description: updatedNote.starred
+          ? "This note is now in your starred list."
+          : "This note was removed from your starred list.",
+        type: "success",
+      });
+    },
+    onError: (error) => {
+      toast.add({
+        title: "Could not update star",
+        description: error instanceof Error ? error.message : "Please try again.",
+        type: "error",
+      });
     },
   });
 
@@ -41,6 +67,20 @@ export default function ShowNotePage({ params }: { params: Promise<{ id: string 
               <ArrowLeft size={16} /> Back to notes
             </Link>
             <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => updateStarred.mutate(!note.starred)}
+                disabled={updateStarred.isPending}
+                aria-label={note.starred ? "Remove from starred notes" : "Add to starred notes"}
+                aria-pressed={note.starred}
+                className="flex h-9 items-center gap-2 rounded-lg border border-black/8 px-3.5 text-xs font-medium text-[#777472] transition hover:bg-black/3 disabled:cursor-wait disabled:opacity-60"
+              >
+                <Star
+                  size={14}
+                  className={note.starred ? "fill-[#c59ae9] text-[#c59ae9]" : undefined}
+                />
+                {note.starred ? "Starred" : "Star"}
+              </button>
               <Link
                 href={`/update/${note.id}`}
                 className="flex h-9 items-center gap-2 rounded-lg bg-[#1f2825] px-3.5 text-xs font-medium text-white! transition hover:bg-[#3b3347]"

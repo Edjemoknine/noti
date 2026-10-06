@@ -1,9 +1,11 @@
 "use server";
 
+import { after } from "next/server";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { and, count, desc, eq } from "drizzle-orm";
 import { db } from "@/db/drizzle";
 import { notes, users } from "@/db/schema";
+import { embedNoteSafe } from "@/lib/embed-note";
 
 export type NoteInput = {
   title: string;
@@ -101,8 +103,18 @@ export async function getNote(id: string) {
 
   return note ?? null;
 }
-import { after } from "next/server";
-import { embedNoteSafe } from "@/lib/embed-note";
+
+export async function setNoteStarred(id: string, starred: boolean) {
+  const userId = await requireUserId();
+
+  const [note] = await db
+    .update(notes)
+    .set({ starred, updatedAt: new Date() })
+    .where(and(eq(notes.id, id), eq(notes.userId, userId)))
+    .returning();
+
+  return note ?? null;
+}
 
 export async function createNote(input: ExtractedNote & { tag?: string }) {
   const userId = await requireUserId();

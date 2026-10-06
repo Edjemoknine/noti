@@ -2,13 +2,12 @@
 
 import Image from "next/image";
 import { SignOutButton, useUser } from "@clerk/nextjs";
-import { Archive, FileText, LogOut, Plus, Settings, Star, X } from "lucide-react";
+import { FileText, LogOut, Plus, Settings, Star, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Button } from "../ui/button";
 const navItems = [
   { label: "All notes", icon: FileText },
   { label: "Starred", icon: Star },
-  { label: "Archive", icon: Archive },
 ];
 type SidebareProps = {
   mobileNav: boolean;
