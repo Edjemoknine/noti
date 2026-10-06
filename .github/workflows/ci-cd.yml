@@ -20,6 +20,7 @@ jobs:
   checks:
     name: Quality Checks
     runs-on: ubuntu-latest
+
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
@@ -35,6 +36,28 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Verify database environment
+        run: |
+          node -e "
+            const url = process.env.DATABASE_URL;
+
+            if (!url) {
+              console.error('DATABASE_URL is missing');
+              process.exit(1);
+            }
+
+            try {
+              const parsed = new URL(url);
+
+              console.log('DATABASE_URL protocol:', parsed.protocol);
+              console.log('DATABASE_URL host:', parsed.host);
+              console.log('DATABASE_URL is valid');
+            } catch {
+              console.error('DATABASE_URL is not a valid URL');
+              process.exit(1);
+            }
+          "
 
       - name: Run ESLint
         run: npm run lint
