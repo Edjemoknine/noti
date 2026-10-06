@@ -3,7 +3,11 @@
 import { useEffect, useState } from "react";
 import { startRecording, stopRecording } from "@/lib/recorder";
 import { blobToAudioData } from "@/lib/audio";
-import { loadWhisper, transcribe } from "@/lib/whisper";
+
+type ModelProgress = {
+  status?: string;
+  progress?: number;
+};
 
 export function useSpeechToText() {
   const [isModelReady, setIsModelReady] = useState(false);
@@ -15,17 +19,26 @@ export function useSpeechToText() {
   const [text, setText] = useState("");
 
   useEffect(() => {
-    loadWhisper((progress) => {
-      if (typeof progress.progress === "number") {
-        setModelProgress(Math.round(progress.progress));
-      }
-    })
-      .then(() => setIsModelReady(true))
-      .catch(() => setModelError("The speech model could not be loaded."))
-      .finally(() => {
+    async function loadModel() {
+      try {
+        const { loadWhisper } = await import("@/lib/whisper");
+
+        await loadWhisper((progress: ModelProgress) => {
+          if (typeof progress.progress === "number") {
+            setModelProgress(Math.round(progress.progress));
+          }
+        });
+
+        setIsModelReady(true);
+      } catch {
+        setModelError("The speech model could not be loaded.");
+      } finally {
         setModelProgress(100);
         setIsModelLoading(false);
-      });
+      }
+    }
+
+    loadModel();
   }, []);
 
   async function start() {
@@ -41,8 +54,9 @@ export function useSpeechToText() {
 
     try {
       const blob = await stopRecording();
-
       const samples = await blobToAudioData(blob);
+
+      const { transcribe } = await import("@/lib/whisper");
 
       const result = await transcribe(samples);
 

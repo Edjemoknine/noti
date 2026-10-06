@@ -1,3 +1,5 @@
+"use client";
+
 import { pipeline } from "@huggingface/transformers";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -12,6 +14,7 @@ export async function loadWhisper(progress_callback?: (progress: ModelProgress) 
   if (!whisper) {
     whisper = await pipeline("automatic-speech-recognition", "Xenova/whisper-tiny.en", {
       progress_callback,
+      device: "wasm",
     });
   }
 

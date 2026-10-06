@@ -33,6 +33,7 @@
     "lucide-react": "^1.46.0",
     "next": "16.3.5",
     "onnxruntime-node": "^1.30.0",
+    "onnxruntime-web": "^1.31.0-dev.20260914-8d85527a0",
     "openai": "^7.27.0",
     "react": "19.2.8",
     "react-dom": "19.2.8",
