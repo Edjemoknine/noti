@@ -1,11 +1,9 @@
 "use server";
 
-import { after } from "next/server";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { and, count, desc, eq } from "drizzle-orm";
 import { db } from "@/db/drizzle";
 import { notes, users } from "@/db/schema";
-import { embedNoteSafe } from "@/lib/embed-note";
 
 export type NoteInput = {
   title: string;
@@ -138,44 +136,8 @@ export async function createNote(input: ExtractedNote & { tag?: string }) {
     })
     .returning();
 
-  // Runs after the response is sent, so the user doesn't wait for embedding
-  /*  after(() =>
-    embedNoteSafe({
-      id: note.id,
-      title: note.title,
-      content: note.content,
-      summary: note.summary,
-      userId: note.userId,
-    }),
-  ); */
-
   return note;
 }
-
-/* export async function createNote(input: ExtractedNote & { tag?: string }) {
-  const userId = await requireUserId();
-  await ensureUser(userId);
-  const title = input.title.trim();
-  const body = input.content.trim();
-
-  if (!title && !body) throw new Error("A note needs a title or body.");
-
-  const [note] = await db
-    .insert(notes)
-    .values({
-      id: crypto.randomUUID(),
-      userId,
-      title: title || "Untitled note",
-      content: body,
-      summary: input.summary.trim() || null,
-      tags: input.tags,
-      actionItems: input.action_items,
-      dataJson: input,
-    })
-    .returning();
-
-  return note;
-} */
 
 export async function updateNote(id: string, input: ExtractedNote & { tag?: string }) {
   const userId = await requireUserId();

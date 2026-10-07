@@ -12,7 +12,7 @@ export async function POST(req: Request) {
       });
     }
 
-    const results = await searchNotes(query, 8);
+    const results = await searchNotes(query, new URL("/api/embed", req.url), 8);
     console.log({ results });
 
     return NextResponse.json({

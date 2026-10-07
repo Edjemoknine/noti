@@ -11,6 +11,7 @@ import { toast } from "@/components/ui/toast";
 import { createNote, updateNote } from "@/actions/notes";
 import type { ExtractedNote } from "@/actions/notes";
 import type { NoteRecord } from "@/actions/notes";
+import { embedNoteViaApi } from "@/utils/embed";
 import { useSpeechToText } from "@/hooks/useSpeechToText";
 
 type NoteEditorProps = {
@@ -41,6 +42,17 @@ export default function NoteEditor({ note, mode = "create" }: NoteEditorProps) {
     mutationFn: (input: ExtractedNote) =>
       mode === "update" && note ? updateNote(note.id, { ...input }) : createNote({ ...input }),
     onSuccess: (savedNote) => {
+      if (mode === "create" && savedNote) {
+        void embedNoteViaApi(savedNote.id).catch((error: unknown) => {
+          console.error(`Failed to embed note ${savedNote.id}`, error);
+          toast.add({
+            title: "Note saved, but search indexing failed",
+            description: "Your note is safe, but it may not appear in semantic search yet.",
+            type: "error",
+          });
+        });
+      }
+
       queryClient.invalidateQueries({ queryKey: ["notes"] });
       setSaved(true);
       toast.add({

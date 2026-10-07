@@ -3,7 +3,7 @@ import { askNotes } from "@/lib/rag";
 export async function POST(req: Request) {
   try {
     const { question } = await req.json();
-    const result = await askNotes(question);
+    const result = await askNotes(question, new URL("/api/embed", req.url));
     const sources = result.sources.map((source) => ({
       title: source.noteTitle,
       noteId: source.noteId,

@@ -4,9 +4,9 @@ import { semanticSearch } from "./search";
 
 const MIN_SIMILARITY = 0.75;
 
-export async function askNotes(question: string) {
+export async function askNotes(question: string, embedEndpoint: URL) {
   // 1. Embed question
-  const queryEmbedding = await embedSearch(question);
+  const queryEmbedding = await embedSearch(question, embedEndpoint);
 
   // 2. Retrieve candidates
   const chunks = await semanticSearch(queryEmbedding, 8);
