@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/db/drizzle";
 import { notes } from "@/db/schema";
 import { embedNote } from "@/lib/embed-note";
-import { embedDocuments } from "@/lib/embedding";
+import { embedQuery } from "@/lib/embedding";
 
 export async function POST(request: Request) {
   let body: unknown;
@@ -20,6 +20,15 @@ export async function POST(request: Request) {
   }
 
   try {
+    if ("type" in body && body.type === "query") {
+      if (!("query" in body) || typeof body.query !== "string" || !body.query.trim()) {
+        return NextResponse.json({ error: "query is required" }, { status: 400 });
+      }
+
+      const embedding = await embedQuery(body.query);
+      return NextResponse.json({ embeddings: [embedding] });
+    }
+
     if ("type" in body && body.type === "note") {
       if (!("noteId" in body) || typeof body.noteId !== "string" || !body.noteId) {
         return NextResponse.json({ error: "noteId is required" }, { status: 400 });
@@ -44,18 +53,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: true });
     }
 
-    if (
-      !("texts" in body) ||
-      !Array.isArray(body.texts) ||
-      body.texts.length === 0 ||
-      !body.texts.every((text) => typeof text === "string")
-    ) {
-      return NextResponse.json({ error: "texts is required" }, { status: 400 });
-    }
-
-    const embeddings = await embedDocuments(body.texts);
-
-    return NextResponse.json({ embeddings });
+    return NextResponse.json({ error: "type must be 'query' or 'note'" }, { status: 400 });
   } catch (error) {
     console.error("Embedding error:", error);
 

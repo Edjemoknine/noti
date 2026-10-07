@@ -9,9 +9,11 @@ export async function embedNote(note: {
   title: string;
   content: string;
   summary: string | null;
+  tags: string[];
+  actionItems: string[];
   userId: string;
 }) {
-  const chunks = chunkNote(note.title, note.content, note.summary);
+  const chunks = chunkNote(note.title, note.content, note.summary, note.tags, note.actionItems);
   const vectors = await embedDocuments(chunks);
 
   // Replace any existing chunks (makes this reusable for updates too)

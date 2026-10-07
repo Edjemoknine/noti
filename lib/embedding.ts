@@ -33,13 +33,24 @@ export async function embedDocuments(texts: string[]): Promise<number[][]> {
   return result;
 }
 
+export async function embedQuery(query: string): Promise<number[]> {
+  const text = query.trim();
+  if (!text) {
+    throw new Error("Search query cannot be empty");
+  }
+  const [embedding] = await run([
+    `Represent this sentence for searching relevant passages: ${text}`,
+  ]);
+  return embedding;
+}
+
 export async function embedSearch(query: string, endpoint: URL) {
   const response = await fetch(endpoint, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ texts: [query] }),
+    body: JSON.stringify({ type: "query", query }),
   });
 
   const data: unknown = await response.json();
