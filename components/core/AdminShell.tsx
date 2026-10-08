@@ -40,7 +40,7 @@ export default function AdminShell({ children }: { children: ReactNode }) {
 
   return (
     <AdminNavigationContext.Provider value={{ activeNav, setActiveNav }}>
-      <main className="dashboard-shell flex h-dvh w-full overflow-hidden bg-[#f5f5ef] text-[#1f2825]">
+      <main className="dashboard-shell fixed inset-0 flex w-full overflow-hidden bg-[#f5f5ef] text-[#1f2825]">
         <Sidebare
           activeNav={sidebarActiveNav}
           mobileNav={mobileNav}
@@ -48,8 +48,10 @@ export default function AdminShell({ children }: { children: ReactNode }) {
           setActiveNav={handleActiveNavChange}
         />
         <section className="flex min-h-0 min-w-0 flex-1 flex-col">
-          <Header setMobileNav={setMobileNav} />
-          <div className="min-h-0 flex-1 overflow-y-auto *:scrollbar-thin *:scrollbar-track-transparent *:scrollbar-thumb-black/20">
+          <div className="shrink-0">
+            <Header setMobileNav={setMobileNav} />
+          </div>
+          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain *:scrollbar-thin *:scrollbar-track-transparent *:scrollbar-thumb-black/20">
             {children}
           </div>
         </section>
